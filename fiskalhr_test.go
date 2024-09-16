@@ -14,16 +14,6 @@ var certPath string
 var certPassword string
 var testOIB string
 
-// Function to clean up the global variables
-func cleanupGlobals() {
-	// Reset or clean up any global variables
-	testEntity = nil
-	testCert = nil
-	certPassword = ""
-
-	fmt.Println("Cleaned up global variables.")
-}
-
 // TestMain is run before any other tests. It sets up the shared CertManager instance.
 func TestMain(m *testing.M) {
 
@@ -54,8 +44,6 @@ ___________.__        __           .__    ___ _____________    ________
 	// Run tests
 	code := m.Run()
 
-	// Clean up (if needed)
-	cleanupGlobals()
 	// Exit with the code returned by m.Run()
 	os.Exit(code)
 }
