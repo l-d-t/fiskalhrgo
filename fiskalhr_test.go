@@ -19,9 +19,7 @@ func cleanupGlobals() {
 	// Reset or clean up any global variables
 	testEntity = nil
 	testCert = nil
-	certPath = ""
 	certPassword = ""
-	testOIB = ""
 
 	fmt.Println("Cleaned up global variables.")
 }
@@ -181,8 +179,14 @@ func TestLoadCert(t *testing.T) {
 func TestDisplayCertInfo(t *testing.T) {
 	t.Logf("Testing certificate display...")
 
+	t.Log("Cert Text:")
 	// Display the certificate information
-	testCert.DisplayCertInfo()
+	fmt.Print(testCert.DisplayCertInfoText())
+
+	t.Log("Cert Markdown:")
+	t.Log(testCert.DisplayCertInfoMarkdown())
+	t.Log("Cert HTML:")
+	t.Log(testCert.DisplayCertInfoHTML())
 }
 
 func TestExtractOIB(t *testing.T) {

@@ -155,27 +155,75 @@ func (cm *CertManager) GetCertOIB() (string, error) {
 	return ex[1], nil
 }
 
-// DisplayCertInfo prints the certificate details (Issuer, Subject, Validity, and CA certs)
-func (cm *CertManager) DisplayCertInfo() {
+func (cm *CertManager) DisplayCertInfoText() string {
 	if cm.publicCert == nil {
-		fmt.Println("No public certificate available.")
-		return
+		return "No public certificate available."
 	}
 
-	// Display the public certificate information
-	fmt.Println("Certificate Information:")
-	fmt.Printf("Issuer: %s\n", cm.publicCert.Issuer.String())
-	fmt.Printf("Subject: %s\n", cm.publicCert.Subject.String())
-	fmt.Printf("Valid From: %s\n", cm.publicCert.NotBefore.Format("02 Jan 2006 15:04:05 MST"))
-	fmt.Printf("Valid Until: %s\n", cm.publicCert.NotAfter.Format("02 Jan 2006 15:04:05 MST"))
+	result := "Certificate Information:\n"
+	result += fmt.Sprintf("Issuer: %s\n", cm.publicCert.Issuer.String())
+	result += fmt.Sprintf("Subject: %s\n", cm.publicCert.Subject.String())
+	result += fmt.Sprintf("Serial Number: %s\n", cm.publicCert.SerialNumber.String())
+	result += fmt.Sprintf("Valid From: %s\n", cm.publicCert.NotBefore.Format("02 Jan 2006 15:04:05 MST"))
+	result += fmt.Sprintf("Valid Until: %s\n", cm.publicCert.NotAfter.Format("02 Jan 2006 15:04:05 MST"))
 
 	// Display CA certificates if present
 	if len(cm.caCerts) > 0 {
-		fmt.Println("CA Certificates:")
+		result += "CA Certificates:\n"
 		for i, caCert := range cm.caCerts {
-			fmt.Printf("CA Cert %d: Issuer: %s, Subject: %s\n", i+1, caCert.Issuer.String(), caCert.Subject.String())
+			result += fmt.Sprintf("CA Cert %d: Issuer: %s, Subject: %s\n", i+1, caCert.Issuer.String(), caCert.Subject.String())
 		}
 	} else {
-		fmt.Println("No CA certificates found.")
+		result += "No CA certificates found.\n"
 	}
+	return result
+}
+
+func (cm *CertManager) DisplayCertInfoMarkdown() string {
+	if cm.publicCert == nil {
+		return "No public certificate available."
+	}
+
+	result := "# Certificate Information\n"
+	result += fmt.Sprintf("**Issuer**: %s\n\n", cm.publicCert.Issuer.String())
+	result += fmt.Sprintf("**Subject**: %s\n\n", cm.publicCert.Subject.String())
+	result += fmt.Sprintf("**Serial Number**: %s\n\n", cm.publicCert.SerialNumber.String())
+	result += fmt.Sprintf("**Valid From**: %s\n\n", cm.publicCert.NotBefore.Format("02 Jan 2006 15:04:05 MST"))
+	result += fmt.Sprintf("**Valid Until**: %s\n\n", cm.publicCert.NotAfter.Format("02 Jan 2006 15:04:05 MST"))
+
+	// Display CA certificates if present
+	if len(cm.caCerts) > 0 {
+		result += "## CA Certificates:\n"
+		for i, caCert := range cm.caCerts {
+			result += fmt.Sprintf("- CA Cert %d: **Issuer**: %s, **Subject**: %s\n", i+1, caCert.Issuer.String(), caCert.Subject.String())
+		}
+	} else {
+		result += "No CA certificates found.\n"
+	}
+	return result
+}
+
+func (cm *CertManager) DisplayCertInfoHTML() string {
+	if cm.publicCert == nil {
+		return "<p>No public certificate available.</p>"
+	}
+
+	result := "<h1>Certificate Information</h1>"
+	result += fmt.Sprintf("<p><strong>Issuer:</strong> %s</p>", cm.publicCert.Issuer.String())
+	result += fmt.Sprintf("<p><strong>Subject:</strong> %s</p>", cm.publicCert.Subject.String())
+	result += fmt.Sprintf("<p><strong>Serial Number:</strong> %s</p>", cm.publicCert.SerialNumber.String())
+	result += fmt.Sprintf("<p><strong>Valid From:</strong> %s</p>", cm.publicCert.NotBefore.Format("02 Jan 2006 15:04:05 MST"))
+	result += fmt.Sprintf("<p><strong>Valid Until:</strong> %s</p>", cm.publicCert.NotAfter.Format("02 Jan 2006 15:04:05 MST"))
+
+	// Display CA certificates if present
+	if len(cm.caCerts) > 0 {
+		result += "<h2>CA Certificates</h2><ul>"
+		for i, caCert := range cm.caCerts {
+			result += fmt.Sprintf("<li>CA Cert %d: <strong>Issuer:</strong> %s, <strong>Subject:</strong> %s</li>", i+1, caCert.Issuer.String(), caCert.Subject.String())
+		}
+		result += "</ul>"
+	} else {
+		result += "<p>No CA certificates found.</p>"
+	}
+	return result
 }

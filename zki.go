@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// GenerateZKI generates the ZKI based on the given data, similar to your PHP version
+// GenerateZKI generates the ZKI based on the given data
 func (entity *FiskalEntity) GenerateZKI(issueDateTime time.Time, invoiceNumber uint, location string, deviceID uint, totalAmount string) (string, error) {
 
 	formattedTime := issueDateTime.Format("02.01.2006 15:04:05")
