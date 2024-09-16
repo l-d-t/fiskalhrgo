@@ -5,16 +5,39 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"golang.org/x/crypto/pkcs12"
 )
 
 // CertManager holds the private key, public certificate, and additional info
 type CertManager struct {
-	privateKey *rsa.PrivateKey
-	publicCert *x509.Certificate
-	caCerts    []*x509.Certificate // This holds any CA certs
-	certInfo   map[string]interface{}
+	privateKey  *rsa.PrivateKey
+	publicCert  *x509.Certificate
+	caCerts     []*x509.Certificate // This holds any CA certs
+	certORG     string
+	certOIB     string
+	certSERIAL  string
+	init_ok     bool
+	expired     bool
+	expire_soon bool
+	expire_days uint16
+}
+
+func NewCertManager() *CertManager {
+	return &CertManager{
+		privateKey:  nil,
+		publicCert:  nil,
+		caCerts:     []*x509.Certificate{},
+		certORG:     "",
+		certOIB:     "",
+		certSERIAL:  "",
+		init_ok:     false,
+		expired:     false,
+		expire_soon: false,
+		expire_days: 0,
+	}
 }
 
 // DecodeP12Cert loads and decodes a P12 certificate, extracting the private key, public cert, and CA certificates
@@ -79,23 +102,72 @@ func (cm *CertManager) DecodeP12Cert(certPath string, password string) error {
 	cm.privateKey = privateKey
 	cm.publicCert = certificate
 	cm.caCerts = caCerts
-	cm.certInfo = map[string]interface{}{
-		"issuer":      certificate.Issuer.String(),
-		"subject":     certificate.Subject.String(),
-		"valid_from":  certificate.NotBefore,
-		"valid_until": certificate.NotAfter,
+
+	// Check if the certificate is expired
+	now := time.Now()
+	if now.Before(certificate.NotBefore) {
+		return fmt.Errorf("certificate is not valid yet: valid from %v", certificate.NotBefore)
 	}
+	if now.After(certificate.NotAfter) {
+		cm.expired = true
+	}
+
+	// Check if the certificate is expiring soon (within 30 days)
+	daysUntilExpiration := certificate.NotAfter.Sub(now).Hours() / 24
+	cm.expire_days = uint16(daysUntilExpiration)
+	if daysUntilExpiration <= 30 {
+		cm.expire_soon = true
+	}
+
+	// Extract the OIB
+	oib, err := cm.GetCertOIB()
+	if err != nil {
+		return fmt.Errorf("Error extracting OIB: %v", err)
+	}
+	cm.certOIB = oib
+	cm.certORG = certificate.Subject.Organization[0]
+
+	cm.init_ok = true
 
 	return nil
 }
 
+// GetCertOIB extracts the OIB from the certificate's subject information
+func (cm *CertManager) GetCertOIB() (string, error) {
+	if cm.publicCert == nil {
+		return "", fmt.Errorf("certificate not loaded")
+	}
+
+	// Extract the subject's organization (O) and country (C) fields
+	organization := cm.publicCert.Subject.Organization
+	country := cm.publicCert.Subject.Country
+
+	if len(organization) == 0 || len(country) == 0 {
+		return "", fmt.Errorf("organization or country fields missing in certificate")
+	}
+
+	// Try to extract the OIB by splitting the organization field at the country field
+	ex := strings.Split(organization[0], country[0])
+	if len(ex) < 2 {
+		return "", fmt.Errorf("failed to extract OIB from certificate")
+	}
+
+	return ex[1], nil
+}
+
 // DisplayCertInfo prints the certificate details (Issuer, Subject, Validity, and CA certs)
 func (cm *CertManager) DisplayCertInfo() {
+	if cm.publicCert == nil {
+		fmt.Println("No public certificate available.")
+		return
+	}
+
+	// Display the public certificate information
 	fmt.Println("Certificate Information:")
-	fmt.Printf("Issuer: %s\n", cm.certInfo["issuer"])
-	fmt.Printf("Subject: %s\n", cm.certInfo["subject"])
-	fmt.Printf("Valid From: %s\n", cm.certInfo["valid_from"])
-	fmt.Printf("Valid Until: %s\n", cm.certInfo["valid_until"])
+	fmt.Printf("Issuer: %s\n", cm.publicCert.Issuer.String())
+	fmt.Printf("Subject: %s\n", cm.publicCert.Subject.String())
+	fmt.Printf("Valid From: %s\n", cm.publicCert.NotBefore.Format("02 Jan 2006 15:04:05 MST"))
+	fmt.Printf("Valid Until: %s\n", cm.publicCert.NotAfter.Format("02 Jan 2006 15:04:05 MST"))
 
 	// Display CA certificates if present
 	if len(cm.caCerts) > 0 {
