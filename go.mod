@@ -1,4 +1,4 @@
-module github.com/arvvoid/fiskalhrgo
+module github.com/l-d-t/fiskalhrgo
 
 go 1.23.1
 
