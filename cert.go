@@ -208,7 +208,7 @@ func (cm *CertManager) DisplayCertInfoHTML() string {
 		return "<p>No public certificate available.</p>"
 	}
 
-	result := "<h1>Certificate Information</h1>"
+	result := "<h3>Certificate Information</h3>"
 	result += fmt.Sprintf("<p><strong>Issuer:</strong> %s</p>", cm.publicCert.Issuer.String())
 	result += fmt.Sprintf("<p><strong>Subject:</strong> %s</p>", cm.publicCert.Subject.String())
 	result += fmt.Sprintf("<p><strong>Serial Number:</strong> %s</p>", cm.publicCert.SerialNumber.String())
@@ -217,7 +217,7 @@ func (cm *CertManager) DisplayCertInfoHTML() string {
 
 	// Display CA certificates if present
 	if len(cm.caCerts) > 0 {
-		result += "<h2>CA Certificates</h2><ul>"
+		result += "<h4>CA Certificates</h4><ul>"
 		for i, caCert := range cm.caCerts {
 			result += fmt.Sprintf("<li>CA Cert %d: <strong>Issuer:</strong> %s, <strong>Subject:</strong> %s</li>", i+1, caCert.Issuer.String(), caCert.Subject.String())
 		}
@@ -225,5 +225,33 @@ func (cm *CertManager) DisplayCertInfoHTML() string {
 	} else {
 		result += "<p>No CA certificates found.</p>"
 	}
+	return result
+}
+
+func (cm *CertManager) DisplayCertInfoKeyPoints() [][2]string {
+	var result [][2]string
+
+	if cm.publicCert == nil {
+		return append(result, [2]string{"Error", "No public certificate available."})
+	}
+
+	result = append(result, [2]string{"Title", "Certificate Information"})
+	result = append(result, [2]string{"Issuer", cm.publicCert.Issuer.String()})
+	result = append(result, [2]string{"Subject", cm.publicCert.Subject.String()})
+	result = append(result, [2]string{"Serial Number", cm.publicCert.SerialNumber.String()})
+	result = append(result, [2]string{"Valid From", cm.publicCert.NotBefore.Format("02 Jan 2006 15:04:05 MST")})
+	result = append(result, [2]string{"Valid Until", cm.publicCert.NotAfter.Format("02 Jan 2006 15:04:05 MST")})
+
+	// Display CA certificates if present
+	if len(cm.caCerts) > 0 {
+		result = append(result, [2]string{"Title", "CA Certificates"})
+		for i, caCert := range cm.caCerts {
+			result = append(result, [2]string{fmt.Sprintf("CA Cert %d Issuer", i+1), caCert.Issuer.String()})
+			result = append(result, [2]string{fmt.Sprintf("CA Cert %d Subject", i+1), caCert.Subject.String()})
+		}
+	} else {
+		result = append(result, [2]string{"Info", "No CA certificates found."})
+	}
+
 	return result
 }
