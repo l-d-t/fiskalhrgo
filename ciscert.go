@@ -22,8 +22,19 @@ var demoCISCert embed.FS
 //go:embed certProd/fiskalcis*.pem
 var prodCISCert embed.FS
 
+// type signatureCheckCIScert holds the public key, issuer, subject, serial number, and validity dates
+// of a CIS certificate to check signature on CIS responses
+type signatureCheckCIScert struct {
+	PublicKey  *rsa.PublicKey
+	Subject    string
+	Serial     string
+	Issuer     string
+	ValidFrom  time.Time
+	ValidUntil time.Time
+}
+
 // ParseAndVerifyEmbeddedCerts parses the embedded certificates, verifies the chain, and returns the public key of the newest valid certificate
-func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*rsa.PublicKey, error) {
+func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*signatureCheckCIScert, error) {
 	var newestCert *x509.Certificate
 
 	// Read the embedded certificate files
@@ -112,15 +123,22 @@ func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 		return nil, errors.New("public key is not of type RSA")
 	}
 
-	return publicKey, nil
+	return &signatureCheckCIScert{
+		PublicKey:  publicKey,
+		Subject:    newestCert.Subject.String(),
+		Serial:     newestCert.SerialNumber.String(),
+		Issuer:     newestCert.Issuer.String(),
+		ValidFrom:  newestCert.NotBefore,
+		ValidUntil: newestCert.NotAfter,
+	}, nil
 }
 
 // Get demo public key
-func GetDemoPublicKey() (*rsa.PublicKey, error) {
+func GetDemoPublicKey() (*signatureCheckCIScert, error) {
 	return ParseAndVerifyEmbeddedCerts(demoCISCert, "certDemo", "democis*.pem")
 }
 
 // Get production public key
-func GetProductionPublicKey() (*rsa.PublicKey, error) {
+func GetProductionPublicKey() (*signatureCheckCIScert, error) {
 	return ParseAndVerifyEmbeddedCerts(prodCISCert, "certProd", "fiskalcis*.pem")
 }
