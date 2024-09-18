@@ -1,6 +1,3 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: Go
 
 on:
@@ -13,6 +10,10 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    env:
+      FISKALHRGO_TEST_CERT_PATH: ${{ secrets.FISKALHRGO_TEST_CERT_PATH }}
+      FISKALHRGO_TEST_CERT_PASSWORD: ${{ secrets.FISKALHRGO_TEST_CERT_PASSWORD }}
+      FISKALHRGO_TEST_CERT_OIB: ${{ secrets.FISKALHRGO_TEST_CERT_OIB }}
     steps:
     - uses: actions/checkout@v4
 
@@ -23,6 +24,13 @@ jobs:
 
     - name: Build
       run: go build -v ./...
+
+    # Decode and save the P12 certificate (needed for tests)
+    - name: Decode and save the P12 certificate
+      run: |
+        echo "$CIS_P12_BASE64" | base64 -d > /tmp/fiskal.p12
+      env:
+        CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
 
     - name: Test
       run: go test -v ./...
