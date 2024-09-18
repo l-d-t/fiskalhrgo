@@ -60,4 +60,24 @@ func TestCheckCurrency(t *testing.T) {
 	if isValidCurrencyFormat("100.ab") {
 		t.Fatalf("Expected currency 100 to be invalid")
 	}
+
+	// Test negative currency
+	if isValidCurrencyFormat("-100.00") {
+		t.Fatalf("Expected currency 100 to be invalid")
+	}
+
+	//Test zero
+	if !isValidCurrencyFormat("0.00") {
+		t.Fatalf("Expected currency 0.00 to be valid")
+	}
+
+	//Test zero
+	if isValidCurrencyFormat("0.0") {
+		t.Fatalf("Expected currency 0.0 to be invalid")
+	}
+
+	//Test zero
+	if isValidCurrencyFormat("0") {
+		t.Fatalf("Expected currency 0 to be invalid")
+	}
 }
