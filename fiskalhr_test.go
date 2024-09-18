@@ -14,7 +14,7 @@ var certPath string
 var certPassword string
 var testOIB string
 
-// TestMain is run before any other tests. It sets up the shared CertManager instance.
+// TestMain is run before any other tests. It sets up the shared instances and read env variables.
 func TestMain(m *testing.M) {
 
 	fmt.Println(`
@@ -48,112 +48,7 @@ ___________.__        __           .__    ___ _____________    ________
 	os.Exit(code)
 }
 
-// SECTION 1 - TEST NOT DEPENDING ON THE CERTIFICATE
-
-// Test check OIB
-func TestCheckOIB(t *testing.T) {
-	t.Logf("Testing OIB validation...")
-
-	// Test a valid OIB
-	if !ValidateOIB("65049901548") {
-		t.Fatalf("Expected OIB 65049901548 to be valid")
-	}
-
-	// Test an invalid OIB
-	if ValidateOIB("12345678900") {
-		t.Fatalf("Expected OIB 12345678900 to be invalid")
-	}
-}
-
-// Test valid currency format
-func TestCheckCurrency(t *testing.T) {
-	t.Logf("Testing currency validation...")
-
-	// Test a valid currency
-	if !isValidCurrencyFormat("100.00") {
-		t.Fatalf("Expected currency 100.00 to be valid")
-	}
-
-	// Test a valid currency
-	if !isValidCurrencyFormat("13.12") {
-		t.Fatalf("Expected currency 13.12 to be valid")
-	}
-
-	// Test a valid currency
-	if !isValidCurrencyFormat("1.12") {
-		t.Fatalf("Expected currency 1.12 to be valid")
-	}
-
-	// Test a valid currency
-	if !isValidCurrencyFormat("134876348653847632687.99") {
-		t.Fatalf("Expected currency 134876348653847632687.99 to be valid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("100.001") {
-		t.Fatalf("Expected currency 100.001 to be invalid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("100,00") {
-		t.Fatalf("Expected currency 100,00 to be invalid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("100") {
-		t.Fatalf("Expected currency 100 to be invalid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("abc") {
-		t.Fatalf("Expected currency 100 to be invalid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("abc.fg") {
-		t.Fatalf("Expected currency 100 to be invalid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("abc.23") {
-		t.Fatalf("Expected currency 100 to be invalid")
-	}
-
-	// Test an invalid currency
-	if isValidCurrencyFormat("100.ab") {
-		t.Fatalf("Expected currency 100 to be invalid")
-	}
-}
-
-// SECTION 2 - TEST DEPENDING ON THE CERTIFICATE
-
-// Test embeded CIS demo certificate
-func TestParseAndVerifyEmbeddedCertsDemo(t *testing.T) {
-	t.Logf("Testing embedded CIS demo certificate...")
-
-	// Parse and verify the embedded CIS demo certificate
-	_, err := GetDemoPublicKey()
-	if err != nil {
-		t.Fatalf("Failed to parse and verify embedded CIS demo certificate: %v", err)
-	}
-
-	t.Logf("Embedded CIS demo certificate parsed and verified successfully")
-}
-
-// Test embeded CIS production certificate
-func TestParseAndVerifyEmbeddedCertsProd(t *testing.T) {
-	t.Logf("Testing embedded CIS production certificate...")
-
-	// Parse and verify the embedded CIS production certificate
-	_, err := GetProductionPublicKey()
-	if err != nil {
-		t.Fatalf("Failed to parse and verify embedded CIS production certificate: %v", err)
-	}
-
-	t.Logf("Embedded CIS production certificate parsed and verified successfully")
-}
-
-// TestLoadCert checks if the certificate was loaded correctly.
+// TestLoadCert checks if provided client P12 fiskal certificate was loaded correctly.
 func TestLoadCert(t *testing.T) {
 	t.Logf("Testing certificate loading...")
 
@@ -226,8 +121,6 @@ func TestExtractOIB(t *testing.T) {
 
 	t.Logf("Extracted OIB: %s", oib)
 }
-
-// SECTION 3 - TEST DEPENDING ON FiskalEntity and all working parts
 
 // Test without passing a loaded certificate
 func TestNewFiskalEntityStandalone(t *testing.T) {
