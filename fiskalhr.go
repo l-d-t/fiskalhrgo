@@ -56,7 +56,7 @@ func NewFiskalEntity(oib string, cert *CertManager, chk_expired bool, cert_confi
 		cert = NewCertManager()
 		err := cert.DecodeP12Cert(cert_config[0], cert_config[1])
 		if err != nil {
-			return nil, fmt.Errorf("Cert decode fail: %v", err)
+			return nil, fmt.Errorf("cert decode fail: %v", err)
 		}
 	}
 

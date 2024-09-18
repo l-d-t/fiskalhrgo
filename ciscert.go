@@ -4,7 +4,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"embed"
-	_ "embed"
 	"encoding/pem"
 	"errors"
 	"fmt"

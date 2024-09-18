@@ -122,7 +122,7 @@ func (cm *CertManager) DecodeP12Cert(certPath string, password string) error {
 	// Extract the OIB
 	oib, err := cm.GetCertOIB()
 	if err != nil {
-		return fmt.Errorf("Error extracting OIB: %v", err)
+		return fmt.Errorf("error extracting OIB: %v", err)
 	}
 	cm.certOIB = oib
 	cm.certORG = certificate.Subject.Organization[0]
