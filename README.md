@@ -11,7 +11,7 @@
 ## Overview
 
 FiskalHR Go is a Go library designed for Croatian fiscalization (fiskalizacija). The goal of this library is to provide a well-maintained, efficient, and hassle-free solution with embedded certificates for checking signatures, making it easy to use.
-Based on ["Fiskalizacija" specification v2.3](https://www.porezna-uprava.hr/HR_Fiskalizacija/Documents/Fiskalizacija%20-%20Tehnicka%20specifikacija%20za%20korisnike_v2.3.pdf)
+Based on ["Fiskalizacija" specification v2.5](https://www.porezna-uprava.hr/HR_Fiskalizacija/Documents/Fiskalizacija%20-%20Tehnicka%20specifikacija%20za%20korisnike_v2.5._23_10_23pdf.pdf)
 
 **Note:** This project is currently a work in progress and is not yet usable.
 

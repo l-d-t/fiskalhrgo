@@ -11,7 +11,7 @@
 ## Pregled
 
 FiskalHR Go je Go modul dizajniran za fiskalizaciju. Cilj ovog modula je pružiti dobro održavano, učinkovito i jednostavno rješenje s ugrađenim certifikatima za provjeru potpisa, čineći je jednostavnom za korištenje.
-Temeljeno na ["Fiskalizacija" specifikaciji v2.3](https://www.porezna-uprava.hr/HR_Fiskalizacija/Documents/Fiskalizacija%20-%20Tehnicka%20specifikacija%20za%20korisnike_v2.3.pdf)
+Temeljeno na ["Fiskalizacija" specifikaciji v2.5](https://www.porezna-uprava.hr/HR_Fiskalizacija/Documents/Fiskalizacija%20-%20Tehnicka%20specifikacija%20za%20korisnike_v2.5._23_10_23pdf.pdf)
 
 **Napomena:** Ovaj projekt je trenutno u izradi i još nije upotrebljiv.
 
