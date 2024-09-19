@@ -22,19 +22,21 @@ var demoCISCert embed.FS
 var prodCISCert embed.FS
 
 // type signatureCheckCIScert holds the public key, issuer, subject, serial number, and validity dates
-// of a CIS certificate to check signature on CIS responses
+// of a CIS certificate to check signature on CIS responses. It also holds the SSL verify pool
 type signatureCheckCIScert struct {
-	PublicKey  *rsa.PublicKey
-	Subject    string
-	Serial     string
-	Issuer     string
-	ValidFrom  time.Time
-	ValidUntil time.Time
+	PublicKey     *rsa.PublicKey
+	Subject       string
+	Serial        string
+	Issuer        string
+	ValidFrom     time.Time
+	ValidUntil    time.Time
+	SSLverifyPoll *x509.CertPool
 }
 
 // ParseAndVerifyEmbeddedCerts parses the embedded certificates, verifies the chain, and returns the public key of the newest valid certificate
 func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*signatureCheckCIScert, error) {
 	var newestCert *x509.Certificate
+	var roots *x509.CertPool
 
 	// Read the embedded certificate files
 	certFiles, err := certFS.ReadDir(dir)
@@ -77,7 +79,7 @@ func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 		}
 
 		// Verify the certificate chain
-		roots := x509.NewCertPool()
+		roots = x509.NewCertPool()
 		intermediates := x509.NewCertPool()
 
 		// Add the root certificate to the roots pool
@@ -123,12 +125,13 @@ func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 	}
 
 	return &signatureCheckCIScert{
-		PublicKey:  publicKey,
-		Subject:    newestCert.Subject.String(),
-		Serial:     newestCert.SerialNumber.String(),
-		Issuer:     newestCert.Issuer.String(),
-		ValidFrom:  newestCert.NotBefore,
-		ValidUntil: newestCert.NotAfter,
+		PublicKey:     publicKey,
+		Subject:       newestCert.Subject.String(),
+		Serial:        newestCert.SerialNumber.String(),
+		Issuer:        newestCert.Issuer.String(),
+		ValidFrom:     newestCert.NotBefore,
+		ValidUntil:    newestCert.NotAfter,
+		SSLverifyPoll: roots,
 	}, nil
 }
 

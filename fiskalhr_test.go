@@ -125,7 +125,7 @@ func TestExtractOIB(t *testing.T) {
 // Test without passing a loaded certificate
 func TestNewFiskalEntityStandalone(t *testing.T) {
 	t.Logf("Testing FiskalEntity with cert init creation...")
-	testEntityStandalone, err := NewFiskalEntity(testOIB, nil, true, certPath, certPassword)
+	testEntityStandalone, err := NewFiskalEntity(testOIB, true, nil, true, certPath, certPassword)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestNewFiskalEntityStandalone(t *testing.T) {
 func TestNewFiskalEntity(t *testing.T) {
 	t.Logf("Testing FiskalEntity with passing cert menager creation...")
 	var err error
-	testEntity, err = NewFiskalEntity(testOIB, testCert, true)
+	testEntity, err = NewFiskalEntity(testOIB, true, testCert, true)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
