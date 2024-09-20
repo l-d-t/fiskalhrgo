@@ -125,7 +125,7 @@ func TestExtractOIB(t *testing.T) {
 // Test without passing a loaded certificate
 func TestNewFiskalEntityStandalone(t *testing.T) {
 	t.Logf("Testing FiskalEntity with cert init creation...")
-	testEntityStandalone, err := NewFiskalEntity(testOIB, true, nil, true, certPath, certPassword)
+	testEntityStandalone, err := NewFiskalEntity(testOIB, true, true, nil, true, certPath, certPassword)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
@@ -137,9 +137,9 @@ func TestNewFiskalEntityStandalone(t *testing.T) {
 // Test with passing the loaded certificate
 // Also init global testEntity for other tests
 func TestNewFiskalEntity(t *testing.T) {
-	t.Logf("Testing FiskalEntity with passing cert menager creation...")
+	t.Logf("Testing FiskalEntity with passing cert manager creation...")
 	var err error
-	testEntity, err = NewFiskalEntity(testOIB, true, testCert, true)
+	testEntity, err = NewFiskalEntity(testOIB, true, true, testCert, true)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
@@ -210,5 +210,25 @@ func TestKnownZKI(t *testing.T) {
 		t.Fatalf("ERROR - Expected ZKI: %s, got %s", expectedZKI, zki)
 	} else {
 		t.Log("ZKI matched the expected value.")
+	}
+}
+
+// Test CISEcho
+func TestCISEcho(t *testing.T) {
+	t.Logf("Testing CISEcho...")
+	msg := "Hello, CIS, from FiskalhrGo!"
+
+	t.Logf("Sending message to CIS: %s", msg)
+
+	// Reuse the loaded certManager to generate ZKI
+	resp, err := testEntity.CISEcho(msg)
+	if err != nil {
+		t.Fatalf("Failed to make CISEcho request: %v", err)
+	}
+
+	t.Logf("CISEcho Response: %v", resp)
+
+	if resp != msg {
+		t.Fatalf("Expected the sent message returned!")
 	}
 }

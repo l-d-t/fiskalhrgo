@@ -2,16 +2,21 @@ package fiskalhrgo
 
 import "encoding/xml"
 
+const DefaultNamespace = "http://www.apis-it.hr/fin/2012/types/f73"
+
 // RacunZahtjev ...
 type RacunZahtjev struct {
+	XMLName     xml.Name       `xml:"tns:RacunZahtjev"`
+	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
 	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"Zaglavlje"`
-	Racun       *RacunType     `xml:"Racun"`
+	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun       *RacunType     `xml:"tns:Racun"`
 	DsSignature *SignatureType `xml:"ds:Signature"`
 }
 
 // RacunOdgovor ...
 type RacunOdgovor struct {
+	XMLName     xml.Name              `xml:"RacunOdgovor"`
 	IdAttr      string                `xml:"Id,attr,omitempty"`
 	Zaglavlje   *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	Jir         string                `xml:"Jir"`
@@ -21,14 +26,17 @@ type RacunOdgovor struct {
 
 // PrateciDokumentiZahtjev ...
 type PrateciDokumentiZahtjev struct {
+	XMLName         xml.Name             `xml:"tns:PrateciDokumentiZahtjev"`
+	Xmlns           string               `xml:"xmlns:tns,attr"` // Declare the tns namespace
 	IdAttr          string               `xml:"Id,attr,omitempty"`
-	Zaglavlje       *ZaglavljeType       `xml:"Zaglavlje"`
-	PrateciDokument *PrateciDokumentType `xml:"PrateciDokument"`
+	Zaglavlje       *ZaglavljeType       `xml:"tns:Zaglavlje"`
+	PrateciDokument *PrateciDokumentType `xml:"tns:PrateciDokument"`
 	DsSignature     *SignatureType       `xml:"ds:Signature"`
 }
 
 // PrateciDokumentiOdgovor ...
 type PrateciDokumentiOdgovor struct {
+	XMLName     xml.Name              `xml:"PrateciDokumentiOdgovor"`
 	IdAttr      string                `xml:"Id,attr,omitempty"`
 	Zaglavlje   *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	Jir         string                `xml:"Jir"`
@@ -38,14 +46,17 @@ type PrateciDokumentiOdgovor struct {
 
 // RacunPDZahtjev ...
 type RacunPDZahtjev struct {
+	XMLName     xml.Name       `xml:"tns:RacunPDZahtjev"`
+	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
 	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"Zaglavlje"`
-	Racun       *RacunType     `xml:"Racun"`
+	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun       *RacunType     `xml:"tns:Racun"`
 	DsSignature *SignatureType `xml:"ds:Signature"`
 }
 
 // RacunPDOdgovor ...
 type RacunPDOdgovor struct {
+	XMLName     xml.Name              `xml:"RacunPDOdgovor"`
 	IdAttr      string                `xml:"Id,attr,omitempty"`
 	Zaglavlje   *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	Jir         string                `xml:"Jir"`
@@ -55,14 +66,17 @@ type RacunPDOdgovor struct {
 
 // PromijeniNacPlacZahtjev ...
 type PromijeniNacPlacZahtjev struct {
+	XMLName     xml.Name       `xml:"tns:PromijeniNacPlacZahtjev"`
+	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
 	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"Zaglavlje"`
-	Racun       *RacunType     `xml:"Racun"`
+	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun       *RacunType     `xml:"tns:Racun"`
 	DsSignature *SignatureType `xml:"ds:Signature"`
 }
 
 // PromijeniNacPlacOdgovor ...
 type PromijeniNacPlacOdgovor struct {
+	XMLName        xml.Name              `xml:"PromijeniNacPlacOdgovor"`
 	IdAttr         string                `xml:"Id,attr,omitempty"`
 	Zaglavlje      *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	PorukaOdgovora *PorukaOdgovoraType   `xml:"PorukaOdgovora"`
@@ -72,14 +86,17 @@ type PromijeniNacPlacOdgovor struct {
 
 // NapojnicaZahtjev ...
 type NapojnicaZahtjev struct {
+	XMLName     xml.Name       `xml:"tns:NapojnicaZahtjev"`
+	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
 	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"Zaglavlje"`
-	Racun       *RacunType     `xml:"Racun"`
+	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun       *RacunType     `xml:"tns:Racun"`
 	DsSignature *SignatureType `xml:"ds:Signature"`
 }
 
 // NapojnicaOdgovor ...
 type NapojnicaOdgovor struct {
+	XMLName        xml.Name              `xml:"NapojnicaOdgovor"`
 	IdAttr         string                `xml:"Id,attr,omitempty"`
 	Zaglavlje      *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	PorukaOdgovora *PorukaOdgovoraType   `xml:"PorukaOdgovora"`
@@ -90,12 +107,13 @@ type NapojnicaOdgovor struct {
 // EchoRequest represents a simple request with a text body
 type EchoRequest struct {
 	XMLName xml.Name `xml:"tns:EchoRequest"`
+	Xmlns   string   `xml:"xmlns:tns,attr"` // Declare the tns namespace
 	Text    string   `xml:",chardata"`
 }
 
 // EchoResponse represents a simple response with a text body
 type EchoResponse struct {
-	XMLName xml.Name `xml:"tns:EchoResponse"`
+	XMLName xml.Name `xml:"EchoResponse"`
 	Text    string   `xml:",chardata"`
 }
 
@@ -107,8 +125,8 @@ type PorukaOdgovoraType struct {
 
 // ZaglavljeType is Datum i vrijeme slanja poruke.
 type ZaglavljeType struct {
-	IdPoruke     string `xml:"IdPoruke"`
-	DatumVrijeme string `xml:"DatumVrijeme"`
+	IdPoruke     string `xml:"tns:IdPoruke"`
+	DatumVrijeme string `xml:"tns:DatumVrijeme"`
 }
 
 // ZaglavljeOdgovorType ...
@@ -119,114 +137,114 @@ type ZaglavljeOdgovorType struct {
 
 // RacunType represents the invoice type with various details required for fiscalization.
 type RacunType struct {
-	Oib                   string                `xml:"Oib"`                             // Required
-	USustPdv              bool                  `xml:"USustPdv"`                        // Required, Boolean
-	DatVrijeme            string                `xml:"DatVrijeme"`                      // Required, DateTime in format dd.mm.yyyyThh:mm:ss
-	OznSlijed             string                `xml:"OznSlijed"`                       // Required, 'P' or 'N' (Char(1))
-	BrRac                 *BrojRacunaType       `xml:"BrRac"`                           // Required, custom format for "number/business unit/pos device"
-	Pdv                   *PdvType              `xml:"Pdv,omitempty"`                   // Optional, list of VAT (PDV) taxes
-	Pnp                   *PorezNaPotrosnjuType `xml:"Pnp,omitempty"`                   // Optional, tax on consumption (Porez na potrošnju)
-	OstaliPor             *OstaliPoreziType     `xml:"OstaliPor,omitempty"`             // Optional, list of other taxes
-	IznosOslobPdv         string                `xml:"IznosOslobPdv,omitempty"`         // Optional, amount of VAT exemption
-	IznosMarza            string                `xml:"IznosMarza,omitempty"`            // Optional, amount subject to special margin taxation
-	IznosNePodlOpor       string                `xml:"IznosNePodlOpor,omitempty"`       // Optional, amount not subject to tax
-	Naknade               *NaknadeType          `xml:"Naknade,omitempty"`               // Optional, list of fees (e.g., packaging fee)
-	IznosUkupno           string                `xml:"IznosUkupno"`                     // Required, total amount (Decimal)
-	NacinPlac             string                `xml:"NacinPlac"`                       // Required, 'G' (cash), 'K' (card), 'C' (check), 'T' (transaction), 'O' (other) (Char(1))
-	OibOper               string                `xml:"OibOper"`                         // Required, OIB of the operator issuing the invoice
-	ZastKod               string                `xml:"ZastKod"`                         // Required, 32-character alphanumeric protection code
-	NakDost               bool                  `xml:"NakDost"`                         // Required, whether the invoice is delivered later (Boolean)
-	ParagonBrRac          string                `xml:"ParagonBrRac,omitempty"`          // Optional, number of a paragon invoice (in case of full device failure)
-	SpecNamj              string                `xml:"SpecNamj,omitempty"`              // Optional, specific purpose for additional data
-	PrateciDokument       *PrateciDokument      `xml:"PrateciDokument,omitempty"`       // Optional, additional document (prateci dokument)
-	PromijenjeniNacinPlac string                `xml:"PromijenjeniNacinPlac,omitempty"` // Optional, changed payment method
-	Napojnica             *NapojnicaType        `xml:"Napojnica,omitempty"`             // Optional, tip information
+	Oib                   string                `xml:"tns:Oib"`
+	USustPdv              bool                  `xml:"tns:USustPdv"`
+	DatVrijeme            string                `xml:"tns:DatVrijeme"`
+	OznSlijed             string                `xml:"tns:OznSlijed"`
+	BrRac                 *BrojRacunaType       `xml:"tns:BrRac"`
+	Pdv                   *PdvType              `xml:"tns:Pdv,omitempty"`
+	Pnp                   *PorezNaPotrosnjuType `xml:"tns:Pnp,omitempty"`
+	OstaliPor             *OstaliPoreziType     `xml:"tns:OstaliPor,omitempty"`
+	IznosOslobPdv         string                `xml:"tns:IznosOslobPdv,omitempty"`
+	IznosMarza            string                `xml:"tns:IznosMarza,omitempty"`
+	IznosNePodlOpor       string                `xml:"tns:IznosNePodlOpor,omitempty"`
+	Naknade               *NaknadeType          `xml:"tns:Naknade,omitempty"`
+	IznosUkupno           string                `xml:"tns:IznosUkupno"`
+	NacinPlac             string                `xml:"tns:NacinPlac"`
+	OibOper               string                `xml:"tns:OibOper"`
+	ZastKod               string                `xml:"tns:ZastKod"`
+	NakDost               bool                  `xml:"tns:NakDost"`
+	ParagonBrRac          string                `xml:"tns:ParagonBrRac,omitempty"`
+	SpecNamj              string                `xml:"tns:SpecNamj,omitempty"`
+	PrateciDokument       *PrateciDokument      `xml:"tns:PrateciDokument,omitempty"`
+	PromijenjeniNacinPlac string                `xml:"tns:PromijenjeniNacinPlac,omitempty"`
+	Napojnica             *NapojnicaType        `xml:"tns:Napojnica,omitempty"`
 }
 
 // PrateciDokumentType ...
 type PrateciDokumentType struct {
-	Oib                 string      `xml:"Oib"`
-	DatVrijeme          string      `xml:"DatVrijeme"`
-	BrPratecegDokumenta *BrojPDType `xml:"BrPratecegDokumenta"`
-	IznosUkupno         string      `xml:"IznosUkupno"`
-	ZastKodPD           string      `xml:"ZastKodPD"`
-	NakDost             bool        `xml:"NakDost"`
+	Oib                 string      `xml:"tns:Oib"`
+	DatVrijeme          string      `xml:"tns:DatVrijeme"`
+	BrPratecegDokumenta *BrojPDType `xml:"tns:BrPratecegDokumenta"`
+	IznosUkupno         string      `xml:"tns:IznosUkupno"`
+	ZastKodPD           string      `xml:"tns:ZastKodPD"`
+	NakDost             bool        `xml:"tns:NakDost"`
 }
 
 // PrateciDokument ...
 type PrateciDokument struct {
-	JirPD     []string `xml:"JirPD"`
-	ZastKodPD []string `xml:"ZastKodPD"`
+	JirPD     []string `xml:"tns:JirPD"`
+	ZastKodPD []string `xml:"tns:ZastKodPD"`
 }
 
 // NapojnicaType ...
 type NapojnicaType struct {
-	IznosNapojnice         string `xml:"iznosNapojnice"`
-	NacinPlacanjaNapojnice string `xml:"nacinPlacanjaNapojnice"`
+	IznosNapojnice         string `xml:"tns:iznosNapojnice"`
+	NacinPlacanjaNapojnice string `xml:"tns:nacinPlacanjaNapojnice"`
 }
 
 // GreskeType ...
 type GreskeType struct {
-	Greska []*GreskaType `xml:"Greska"`
+	Greska []*GreskaType `xml:"tns:Greska"`
 }
 
 // GreskaType ...
 type GreskaType struct {
-	SifraGreske  string `xml:"SifraGreske"`
-	PorukaGreske string `xml:"PorukaGreske"`
+	SifraGreske  string `xml:"tns:SifraGreske"`
+	PorukaGreske string `xml:"tns:PorukaGreske"`
 }
 
 // NaknadeType ...
 type NaknadeType struct {
-	Naknada []*NaknadaType `xml:"Naknada"`
+	Naknada []*NaknadaType `xml:"tns:Naknada"`
 }
 
 // NaknadaType ...
 type NaknadaType struct {
-	NazivN string `xml:"NazivN"`
-	IznosN string `xml:"IznosN"`
+	NazivN string `xml:"tns:NazivN"`
+	IznosN string `xml:"tns:IznosN"`
 }
 
 // OstaliPoreziType ...
 type OstaliPoreziType struct {
-	Porez []*PorezOstaloType `xml:"Porez"`
+	Porez []*PorezOstaloType `xml:"tns:Porez"`
 }
 
 // PorezNaPotrosnjuType ...
 type PorezNaPotrosnjuType struct {
-	Porez []*PorezType `xml:"Porez"`
+	Porez []*PorezType `xml:"tns:Porez"`
 }
 
 // PdvType ...
 type PdvType struct {
-	Porez []*PorezType `xml:"Porez"`
+	Porez []*PorezType `xml:"tns:Porez"`
 }
 
 // PorezOstaloType ...
 type PorezOstaloType struct {
-	Naziv    string `xml:"Naziv"`
-	Stopa    int    `xml:"Stopa"`
-	Osnovica string `xml:"Osnovica"`
-	Iznos    string `xml:"Iznos"`
+	Naziv    string `xml:"tns:Naziv"`
+	Stopa    int    `xml:"tns:Stopa"`
+	Osnovica string `xml:"tns:Osnovica"`
+	Iznos    string `xml:"tns:Iznos"`
 }
 
 // PorezType ...
 type PorezType struct {
-	Stopa    int    `xml:"Stopa"`
-	Osnovica string `xml:"Osnovica"`
-	Iznos    string `xml:"Iznos"`
+	Stopa    int    `xml:"tns:Stopa"`
+	Osnovica string `xml:"tns:Osnovica"`
+	Iznos    string `xml:"tns:Iznos"`
 }
 
 // BrojRacunaType ...
 type BrojRacunaType struct {
-	BrOznRac int    `xml:"BrOznRac"`
-	OznPosPr string `xml:"OznPosPr"`
-	OznNapUr int    `xml:"OznNapUr"`
+	BrOznRac int    `xml:"tns:BrOznRac"`
+	OznPosPr string `xml:"tns:OznPosPr"`
+	OznNapUr int    `xml:"tns:OznNapUr"`
 }
 
 // BrojPDType ...
 type BrojPDType struct {
-	BrOznPD  int    `xml:"BrOznPD"`
-	OznPosPr string `xml:"OznPosPr"`
-	OznNapUr int    `xml:"OznNapUr"`
+	BrOznPD  int    `xml:"tns:BrOznPD"`
+	OznPosPr string `xml:"tns:OznPosPr"`
+	OznNapUr int    `xml:"tns:OznNapUr"`
 }

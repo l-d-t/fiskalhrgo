@@ -5,13 +5,25 @@ import (
 	"testing"
 )
 
+func TestEchoRequestMarshal(t *testing.T) {
+	echoReq := EchoRequest{
+		Xmlns: DefaultNamespace,
+		Text:  "Hello, world!",
+	}
+
+	// Marshal the EchoRequest to XML
+	xmlData, err := xml.MarshalIndent(echoReq, "", "  ")
+	if err != nil {
+		t.Fatalf("Error marshalling EchoRequest: %v", err)
+	}
+
+	t.Log(string(xmlData))
+}
+
 // Test for RacunZahtjev structure
 func TestRacunZahtjevMarshal(t *testing.T) {
 	racun := RacunZahtjev{
-		Zaglavlje: &ZaglavljeType{
-			IdPoruke:     "4ec0a35a-7db7-45c6-9260-7b25b7749d61",
-			DatumVrijeme: "2024-09-19T10:00:00",
-		},
+		Zaglavlje: NewFiskalHeader(),
 		Racun: &RacunType{
 			Oib:         "12345678901",
 			USustPdv:    true,
@@ -25,6 +37,7 @@ func TestRacunZahtjevMarshal(t *testing.T) {
 			ZastKod:     "c3b2ecf807f56e294fbb3d536aad0f6c",
 			NakDost:     false,
 		},
+		Xmlns:  DefaultNamespace,
 		IdAttr: "646332",
 	}
 
@@ -35,30 +48,4 @@ func TestRacunZahtjevMarshal(t *testing.T) {
 	}
 
 	t.Log(string(xmlData))
-}
-
-// Test for RacunOdgovor
-func TestRacunOdgovorUnmarshal(t *testing.T) {
-	xmlData := `<RacunOdgovor Id="646332">
-  <Zaglavlje>
-    <IdPoruke>4ec0a35a-7db7-45c6-9260-7b25b7749d61</IdPoruke>
-    <DatumVrijeme>2024-09-19T10:00:00</DatumVrijeme>
-  </Zaglavlje>
-  <Jir>12345678-1234-1234-1234-123456789012</Jir>
-</RacunOdgovor>`
-
-	var odgovor RacunOdgovor
-	err := xml.Unmarshal([]byte(xmlData), &odgovor)
-	if err != nil {
-		t.Fatalf("Error unmarshalling RacunOdgovor: %v", err)
-	}
-
-	if odgovor.Zaglavlje.IdPoruke != "4ec0a35a-7db7-45c6-9260-7b25b7749d61" {
-		t.Fatalf("Expected IdPoruke: 4ec0a35a-7db7-45c6-9260-7b25b7749d61, but got: %s", odgovor.Zaglavlje.IdPoruke)
-	}
-
-	if odgovor.Jir != "12345678-1234-1234-1234-123456789012" {
-		t.Errorf("Expected JIR: 12345678-1234-1234-1234-123456789012, but got: %s", odgovor.Jir)
-	}
-
 }

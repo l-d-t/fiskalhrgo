@@ -5,28 +5,35 @@ import (
 	"fmt"
 )
 
+// Some important settings
+const production_url = "https://cis.porezna-uprava.hr:8449/FiskalizacijaService"
+const demo_url = "https://cistest.apis-it.hr:8449/FiskalizacijaServiceTest"
+const CIStimeout = 10 //how long to wait for CIS response in seconds
+
 // FiskalEntity represents an entity involved in the fiscalization process.
 // It contains essential information and configurations required for generating
 // and verifying fiscal invoices in compliance with Croatian fiscalization laws.
 type FiskalEntity struct {
-	OIB  string
-	Cert *CertManager
+	OIB     string
+	SustPDV bool
+	Cert    *CertManager
 	// true if the entity is in demo mode and will use the demo CIS certificate and endpoint
 	demoMode bool
 	// holds the public key, issuer, subject, serial number, and validity dates of a CIS certificate to check signature on CIS responses
 	// also contains SSL root CA pool for SSL verification
 	CIScert *signatureCheckCIScert
+	url     string
 }
 
 // NewFiskalEntity creates a new FiskalEntity with default values and an optional CertManager.
 //
 // Parameters:
 //   - oib: The taxpayer's OIB, which will be validated against the OIB in the certificate.
+//   - sustavPDV: If true, the entity is part of the VAT system and will include VAT in the invoices.
 //   - demoMode: If true, the entity is in demo mode and will use the demo CIS certificate and endpoint.
 //   - certManager: If nil, a new CertManager is initialized using the provided certificate path and password.
 //     Otherwise, the existing CertManager is used as is.
 //   - chk_expired: If true, the entity creation will fail if the certificate is expired (recommended).
-//   - centralized: If true, is expected that the invoice numbers are incremented at the location level regardless of the device (see Fiskalizacija documentation).
 //   - certPath, certPassword: These are required if certManager is nil and are used to load the certificate.
 //
 // Certificate Handling and Expiry:
@@ -42,7 +49,7 @@ type FiskalEntity struct {
 //     serial number or fingerprint. This ensures traceability and proof of which certificate was used to sign each invoice.
 //   - While expired certificates may be loaded to handle historical cases, it is recommended to always use a valid,
 //     non-expired certificate when generating and sending new invoices.
-func NewFiskalEntity(oib string, demoMode bool, cert *CertManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
+func NewFiskalEntity(oib string, sustavPDV bool, demoMode bool, cert *CertManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
 
 	// Check if OIB is valid
 	if !ValidateOIB(oib) {
@@ -87,10 +94,19 @@ func NewFiskalEntity(oib string, demoMode bool, cert *CertManager, chk_expired b
 		return nil, errors.New("certificate expired")
 	}
 
+	var url string
+	if demoMode {
+		url = demo_url
+	} else {
+		url = production_url
+	}
+
 	return &FiskalEntity{
 		OIB:      oib,
+		SustPDV:  sustavPDV,
 		Cert:     cert,
 		demoMode: demoMode,
 		CIScert:  CIScert,
+		url:      url,
 	}, nil
 }
