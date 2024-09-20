@@ -185,13 +185,13 @@ type NapojnicaType struct {
 
 // GreskeType ...
 type GreskeType struct {
-	Greska []*GreskaType `xml:"tns:Greska"`
+	Greska []*GreskaType `xml:"Greska"`
 }
 
 // GreskaType ...
 type GreskaType struct {
-	SifraGreske  string `xml:"tns:SifraGreske"`
-	PorukaGreske string `xml:"tns:PorukaGreske"`
+	SifraGreske  string `xml:"SifraGreske"`
+	PorukaGreske string `xml:"PorukaGreske"`
 }
 
 // NaknadeType ...
@@ -237,9 +237,9 @@ type PorezType struct {
 
 // BrojRacunaType ...
 type BrojRacunaType struct {
-	BrOznRac int    `xml:"tns:BrOznRac"`
+	BrOznRac uint   `xml:"tns:BrOznRac"`
 	OznPosPr string `xml:"tns:OznPosPr"`
-	OznNapUr int    `xml:"tns:OznNapUr"`
+	OznNapUr uint   `xml:"tns:OznNapUr"`
 }
 
 // BrojPDType ...

@@ -27,16 +27,12 @@ type SOAPBody struct {
 
 // SOAPEnvelopeNoNamespace represents a SOAP envelope without namespace (for CIS responses)
 // This to be more flexible and permissive on unmarhaling responses.
-// This is a workaround because CIS responses sometimes don't have a namespace in the envelope
-// But if we use requests without namespace, it will not work, their server return 500 error in that case
-// So we have 2 separate structs for marshaling/un-marshaling requests and responses
 type SOAPEnvelopeNoNamespace struct {
 	XMLName xml.Name            `xml:"Envelope"`
 	Body    SOAPBodyNoNamespace `xml:"Body"`
 }
 
-// SOAPBodyNoNamespace represents the body of a SOAP envelope without namespace
-// This is a workaround because CIS responses sometimes don't have a namespace in the envelope
+// SOAPBodyNoNamespace represents the body of a SOAP envelope without namespace (for CIS responses)
 type SOAPBodyNoNamespace struct {
 	XMLName xml.Name `xml:"Body"`
 	Content []byte   `xml:",innerxml"`

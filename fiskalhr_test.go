@@ -1,10 +1,13 @@
 package fiskalhrgo
 
 import (
+	"encoding/xml"
 	"fmt"
 	"os"
 	"testing"
 	"time"
+
+	"math/rand"
 )
 
 var testCert *CertManager
@@ -231,4 +234,187 @@ func TestCISEcho(t *testing.T) {
 	if resp != msg {
 		t.Fatalf("Expected the sent message returned!")
 	}
+}
+
+// Test CIS invoice with helper functions
+func TestNewCISInvoice(t *testing.T) {
+	pdvValues := [][]interface{}{
+		{25, "1000.00", "250.00"},
+	}
+
+	pnpValues := [][]interface{}{
+		{3, "1000.00", "30.00"},
+	}
+
+	ostaliPorValues := [][]interface{}{
+		{"Other Tax", 5, "1000.00", "50.00"},
+	}
+
+	naknadeValues := [][]string{
+		{"Povratna", "0.50"},
+	}
+
+	dateTime := time.Now()
+	centralized := true
+	brOznRac := uint(rand.Intn(6901) + 100)
+	oznPosPr := "001"
+	oznNapUr := uint(1)
+	iznosUkupno := "1330.50"
+	nacinPlac := "G"
+	oibOper := "12345678901"
+	nakDost := true
+	paragonBrRac := "12345"
+	specNamj := "Special Purpose"
+
+	invoice, zki, err := testEntity.NewCISInvoice(
+		dateTime,
+		centralized,
+		brOznRac,
+		oznPosPr,
+		oznNapUr,
+		pdvValues,
+		pnpValues,
+		ostaliPorValues,
+		"0",
+		"0",
+		"0",
+		naknadeValues,
+		iznosUkupno,
+		nacinPlac,
+		oibOper,
+		nakDost,
+		paragonBrRac,
+		specNamj,
+	)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if invoice.Oib != testEntity.OIB {
+		t.Errorf("Expected Oib %v, got %v", testEntity.OIB, invoice.Oib)
+	}
+
+	if invoice.USustPdv != true {
+		t.Errorf("Expected USustPdv true, got %v", invoice.USustPdv)
+	}
+
+	if invoice.DatVrijeme != dateTime.Format("2006-01-02T15:04:05") {
+		t.Errorf("Expected DatVrijeme %v, got %v", dateTime.Format("2006-01-02T15:04:05"), invoice.DatVrijeme)
+	}
+
+	expectedOznSlijed := "P"
+	if !centralized {
+		expectedOznSlijed = "N"
+	}
+	if invoice.OznSlijed != expectedOznSlijed {
+		t.Errorf("Expected OznSlijed %v, got %v", expectedOznSlijed, invoice.OznSlijed)
+	}
+
+	if invoice.BrRac.BrOznRac != brOznRac {
+		t.Errorf("Expected BrOznRac %v, got %v", brOznRac, invoice.BrRac.BrOznRac)
+	}
+
+	if invoice.BrRac.OznPosPr != oznPosPr {
+		t.Errorf("Expected OznPosPr %v, got %v", oznPosPr, invoice.BrRac.OznPosPr)
+	}
+
+	if invoice.BrRac.OznNapUr != oznNapUr {
+		t.Errorf("Expected OznNapUr %v, got %v", oznNapUr, invoice.BrRac.OznNapUr)
+	}
+
+	if invoice.IznosUkupno != iznosUkupno {
+		t.Errorf("Expected IznosUkupno %v, got %v", iznosUkupno, invoice.IznosUkupno)
+	}
+
+	if invoice.NacinPlac != nacinPlac {
+		t.Errorf("Expected NacinPlac %v, got %v", nacinPlac, invoice.NacinPlac)
+	}
+
+	if invoice.OibOper != oibOper {
+		t.Errorf("Expected OibOper %v, got %v", oibOper, invoice.OibOper)
+	}
+
+	if invoice.ZastKod != zki {
+		t.Errorf("Expected ZastKod %v, got %v", zki, invoice.ZastKod)
+	}
+
+	if invoice.NakDost != nakDost {
+		t.Errorf("Expected NakDost %v, got %v", nakDost, invoice.NakDost)
+	}
+
+	if invoice.ParagonBrRac != paragonBrRac {
+		t.Errorf("Expected ParagonBrRac %v, got %v", paragonBrRac, invoice.ParagonBrRac)
+	}
+
+	if invoice.SpecNamj != specNamj {
+		t.Errorf("Expected SpecNamj %v, got %v", specNamj, invoice.SpecNamj)
+	}
+
+	// Additional checks for nullable fields
+	if invoice.Pdv == nil {
+		t.Errorf("Expected Pdv to be non-nil")
+	}
+
+	if invoice.Pnp == nil {
+		t.Errorf("Expected Pnp to be non-nil")
+	}
+
+	if invoice.OstaliPor == nil {
+		t.Errorf("Expected OstaliPor to be non-nil")
+	}
+
+	if invoice.Naknade == nil {
+		t.Errorf("Expected Naknade to be non-nil")
+	}
+
+	//Combine with zahtjev for final XML
+	zahtjev := RacunZahtjev{
+		Zaglavlje: NewFiskalHeader(),
+		Racun:     invoice,
+		Xmlns:     DefaultNamespace,
+		IdAttr:    fmt.Sprintf("%d", brOznRac),
+	}
+
+	t.Logf("Zahtijev UUID: %s", zahtjev.Zaglavlje.IdPoruke)
+	t.Logf("Zahtijev Timestamp: %s", zahtjev.Zaglavlje.DatumVrijeme)
+
+	// Marshal the RacunZahtjev to XML
+	xmlData, err := xml.MarshalIndent(zahtjev, "", "  ")
+	if err != nil {
+		t.Fatalf("Error marshalling RacunZahtjev: %v", err)
+	}
+
+	t.Log(string(xmlData))
+
+	/* TODO: we need to implement proper xml signing and verification for this to make sense
+	         for now we get a response of the apropiate structure
+			 with expected error s004: Neispravan digitalni potpis.
+		// Lets send it to CIS and see if we get a response
+		body, status, errComm := testEntity.GetResponse(xmlData)
+
+		t.Errorf("error in response: %v", errComm)
+
+		//unmarshad bodyu to get Racun Odgovor
+		var racunOdgovor RacunOdgovor
+		if err := xml.Unmarshal(body, &racunOdgovor); err != nil {
+			t.Fatalf("failed to unmarshal XML response: %v\n%v", err, string(body))
+		}
+
+		//output zaglavlje first all elements
+		t.Logf("Racun Odgovor IdPoruke: %s", racunOdgovor.Zaglavlje.IdPoruke)
+		t.Logf("Racun Odgovor DatumVrijeme: %s", racunOdgovor.Zaglavlje.DatumVrijeme)
+
+		if status != 200 {
+
+			//all errors one by one
+			for _, greska := range racunOdgovor.Greske.Greska {
+				t.Logf("Racun Odgovor Greska: %s: %s", greska.SifraGreske, greska.PorukaGreske)
+			}
+
+		} else {
+			//output JIR: Jedinicni identifikator racuna
+			t.Logf("Racun Odgovor JIR: %s", racunOdgovor.Jir)
+		}
+	*/
 }

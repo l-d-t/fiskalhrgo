@@ -15,9 +15,9 @@ import (
 //
 //	dateTime (time.Time): The date and time of the invoice.
 //	centralized (bool): Indicates whether the sequence mark is centralized.
-//	brOznRac (int): The unique number of the invoice.
-//	oznPosPr (string): The identifier for the business location where the invoice was issued.
-//	oznNapUr (int): The identifier for the cash register device used to issue the invoice.
+//	invoiceNumber (uint): The unique number of the invoice.
+//	locationIdentifier (string): The identifier for the business location where the invoice was issued.
+//	registerDeviceID (uint): The identifier for the cash register device used to issue the invoice.
 //	pdvValues ([][]interface{}): A 2D array for VAT details (nullable).
 //	pnpValues ([][]interface{}): A 2D array for consumption tax details (nullable).
 //	ostaliPorValues ([][]interface{}): A 2D array for other tax details (nullable).
@@ -28,20 +28,19 @@ import (
 //	iznosUkupno (string): The total amount.
 //	nacinPlac (string): The payment method.
 //	oibOper (string): The OIB of the operator.
-//	zastKod (string): The protection code.
 //	nakDost (bool): Indicates whether the invoice is delivered.
 //	paragonBrRac (string): The paragon invoice number (optional).
 //	specNamj (string): Special purpose (optional).
 //
 // Returns:
 //
-//	(*RacunType, error): A pointer to a new RacunType instance with the provided values, or an error if the input is invalid.
+//	(*RacunType, string, error): A pointer to a new RacunType instance with the provided values, generated zki or an error if the input is invalid.
 func (fe *FiskalEntity) NewCISInvoice(
 	dateTime time.Time,
 	centralized bool,
-	invoiceNumber int,
+	invoiceNumber uint,
 	locationIdentifier string,
-	registerDeviceID int,
+	registerDeviceID uint,
 	pdvValues [][]interface{},
 	pnpValues [][]interface{},
 	ostaliPorValues [][]interface{},
@@ -52,11 +51,10 @@ func (fe *FiskalEntity) NewCISInvoice(
 	iznosUkupno string,
 	nacinPlac string,
 	oibOper string,
-	zastKod string,
 	nakDost bool,
 	paragonBrRac string,
 	specNamj string,
-) (*RacunType, error) {
+) (*RacunType, string, error) {
 	// Format the date and time
 	formattedDate := dateTime.Format("2006-01-02T15:04:05")
 
@@ -72,7 +70,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 	if pdvValues != nil {
 		pdv, err = NewPdv(pdvValues)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
@@ -80,7 +78,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 	if pnpValues != nil {
 		pnp, err = NewPNP(pnpValues)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
@@ -88,7 +86,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 	if ostaliPorValues != nil {
 		ostaliPor, err = OtherTaxes(ostaliPorValues)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
@@ -96,7 +94,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 	if naknadeValues != nil {
 		naknade, err = Naknade(naknadeValues)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
@@ -105,6 +103,19 @@ func (fe *FiskalEntity) NewCISInvoice(
 		BrOznRac: invoiceNumber,
 		OznPosPr: locationIdentifier,
 		OznNapUr: registerDeviceID,
+	}
+
+	//check means of payment can be:  G - Cash, K - Card, O - Mix/other
+	//								, T - Bank transfer (usually not sent to CIS not mandatory)
+	//                              , C - Check [deprecated]
+	if nacinPlac != "G" && nacinPlac != "K" && nacinPlac != "O" && nacinPlac != "T" && nacinPlac != "C" {
+		return nil, "", errors.New("NacinPlac must be one of the following values: G, K, O, T, C (deprecated)")
+	}
+
+	zki, err := fe.GenerateZKI(dateTime, invoiceNumber, locationIdentifier, registerDeviceID, iznosUkupno)
+
+	if err != nil {
+		return nil, "", err
 	}
 
 	return &RacunType{
@@ -123,11 +134,11 @@ func (fe *FiskalEntity) NewCISInvoice(
 		IznosUkupno:     iznosUkupno,
 		NacinPlac:       nacinPlac,
 		OibOper:         oibOper,
-		ZastKod:         zastKod,
+		ZastKod:         zki,
 		NakDost:         nakDost,
 		ParagonBrRac:    paragonBrRac,
 		SpecNamj:        specNamj,
-	}, nil
+	}, zki, nil
 }
 
 // NewFiskalHeader creates a new instance of ZaglavljeType with a unique message ID and the current timestamp
@@ -377,7 +388,7 @@ func NewPdv(values [][]interface{}) (*PdvType, error) {
 // Returns:
 //
 //	*BrojRacunaType: A pointer to a new BrojRacunaType instance with the provided values.
-func NewInvoiceNumber(InvoiceNumber int, LocationIdentifier string, RegisterDeviceID int) *BrojRacunaType {
+func NewInvoiceNumber(InvoiceNumber uint, LocationIdentifier string, RegisterDeviceID uint) *BrojRacunaType {
 	return &BrojRacunaType{
 		BrOznRac: InvoiceNumber,
 		OznPosPr: LocationIdentifier,
