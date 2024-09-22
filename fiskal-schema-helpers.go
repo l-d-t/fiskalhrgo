@@ -117,8 +117,8 @@ func (fe *FiskalEntity) NewCISInvoice(
 	}
 
 	return &RacunType{
-		Oib:             fe.OIB,
-		USustPdv:        fe.SustPDV,
+		Oib:             fe.oib,
+		USustPdv:        fe.sustPDV,
 		DatVrijeme:      formattedDate,
 		OznSlijed:       oznSlijed,
 		BrRac:           brRac,

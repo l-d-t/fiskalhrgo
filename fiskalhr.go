@@ -8,19 +8,19 @@ import (
 // Some important constants
 const production_url = "https://cis.porezna-uprava.hr:8449/FiskalizacijaService"
 const demo_url = "https://cistest.apis-it.hr:8449/FiskalizacijaServiceTest"
-const CIStimeout = 10 //how long to wait at max for CIS response in seconds
+const cistimeout = 10 //how long to wait at max for CIS response in seconds
 
 // FiskalEntity represents an entity involved in the fiscalization process.
 // It contains essential information and configurations required for generating
 // and verifying fiscal invoices in compliance with Croatian fiscalization laws.
 type FiskalEntity struct {
-	// OIB is the taxpayer's identification number in Croatia (OIB) and must match the OIB in the certificate.
+	// oib is the taxpayer's identification number in Croatia (oib) and must match the oib in the certificate.
 	// This is a mandatory field for fiscalization.
-	OIB string
+	oib string
 
-	// SustPDV indicates whether the entity is part of the VAT system.
+	// sustPDV indicates whether the entity is part of the VAT system.
 	// If true, the entity will include VAT in the invoices.
-	SustPDV bool
+	sustPDV bool
 
 	// locationID is the unique identifier of the location where the fiscalization is taking place.
 	// This identifier is alphanumeric and must be registered in the ePorezna system.
@@ -31,12 +31,12 @@ type FiskalEntity struct {
 	// If false, each register device within the location has its own sequence of invoice numbers.
 	centralizedInvoiceNumber bool
 
-	// Cert holds the certificate and private key used to sign invoices.
-	Cert *CertManager
+	// cert holds the certificate and private key used to sign invoices.
+	cert *CertManager
 
-	// CIScert holds the public key, issuer, subject, serial number, and validity dates of a CIS certificate.
+	// ciscert holds the public key, issuer, subject, serial number, and validity dates of a CIS certificate.
 	// It is used to check the signature on CIS responses and contains the SSL root CA pool for SSL verification.
-	CIScert *signatureCheckCIScert
+	ciscert *signatureCheckCIScert
 
 	// demoMode indicates whether the entity is in demo mode.
 	// If true, the entity will use the demo CIS certificate and endpoint for testing purposes.
@@ -134,13 +134,13 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 	}
 
 	return &FiskalEntity{
-		OIB:                      oib,
-		SustPDV:                  sustavPDV,
+		oib:                      oib,
+		sustPDV:                  sustavPDV,
 		locationID:               locationID,
 		centralizedInvoiceNumber: centralizedInvoiceNumber,
-		Cert:                     cert,
+		cert:                     cert,
 		demoMode:                 demoMode,
-		CIScert:                  CIScert,
+		ciscert:                  CIScert,
 		url:                      url,
 	}, nil
 }

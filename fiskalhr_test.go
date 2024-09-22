@@ -132,7 +132,7 @@ func TestNewFiskalEntityStandalone(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
-	if !testEntityStandalone.Cert.init_ok {
+	if !testEntityStandalone.cert.init_ok {
 		t.Fatalf("Failed to initialize CertManager")
 	}
 }
@@ -287,8 +287,8 @@ func TestNewCISInvoice(t *testing.T) {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	if invoice.Oib != testEntity.OIB {
-		t.Errorf("Expected Oib %v, got %v", testEntity.OIB, invoice.Oib)
+	if invoice.Oib != testEntity.oib {
+		t.Errorf("Expected Oib %v, got %v", testEntity.oib, invoice.Oib)
 	}
 
 	if invoice.USustPdv != true {

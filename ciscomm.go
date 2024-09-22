@@ -42,14 +42,14 @@ type SOAPBodyNoNamespace struct {
 // - Input: XML payload
 // - Output: Response body, error, HTTP status code
 func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
-	if fe.CIScert == nil || fe.CIScert.SSLverifyPoll == nil {
+	if fe.ciscert == nil || fe.ciscert.SSLverifyPoll == nil {
 		return nil, 0, errors.New("CIScert or SSLverifyPoll is not initialized")
 	}
 
 	// Create a custom TLS configuration using TLS 1.3 and the CA pool
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS13,
-		RootCAs:    fe.CIScert.SSLverifyPoll,
+		RootCAs:    fe.ciscert.SSLverifyPoll,
 	}
 
 	// Create a custom HTTP client with the custom TLS configuration
@@ -57,7 +57,7 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
 		Transport: &http.Transport{
 			TLSClientConfig: tlsConfig,
 		},
-		Timeout: CIStimeout * time.Second, // Set a timeout for the request
+		Timeout: cistimeout * time.Second, // Set a timeout for the request
 	}
 
 	// Prepare the SOAP envelope with the payload
