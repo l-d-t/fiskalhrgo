@@ -88,6 +88,11 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 		return nil, errors.New("invalid OIB")
 	}
 
+	//check if locationID is valid
+	if !ValidateLocationID(locationID) {
+		return nil, errors.New("invalid locationID")
+	}
+
 	var CIScert *signatureCheckCIScert
 	var CIScerterror error
 
