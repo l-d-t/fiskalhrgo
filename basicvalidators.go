@@ -1,5 +1,16 @@
 package fiskalhrgo
 
+import (
+	"regexp"
+)
+
+// Helper function to validate if the string is a valid currency format (with 2 decimal places)
+func IsValidCurrencyFormat(amount string) bool {
+	// Regex pattern to match valid decimal with exactly two decimal places
+	validCurrency := regexp.MustCompile(`^\d+(\.\d{2})$`)
+	return validCurrency.MatchString(amount)
+}
+
 // ValidateOIB checks if an OIB is valid using the Mod 11, 10 algorithm
 func ValidateOIB(oib string) bool {
 	if len(oib) != 11 {
@@ -30,4 +41,12 @@ func ValidateOIB(oib string) bool {
 	}
 
 	return checkDigit == lastDigit
+}
+
+// ValidateLocationID validates the locationID
+// It can contain only digits (0-9) and letters (a-z, A-Z), with a maximum length of 20.
+func ValidateLocationID(locationID string) bool {
+	// Regex pattern to match valid locationID
+	validLocationID := regexp.MustCompile(`^[a-zA-Z0-9]{1,20}$`)
+	return validLocationID.MatchString(locationID)
 }

@@ -236,6 +236,15 @@ func TestCISEcho(t *testing.T) {
 	}
 }
 
+func TestPing(t *testing.T) {
+	t.Log("Testing Ping...")
+	err := testEntity.PingCIS()
+	if err != nil {
+		t.Fatalf("Failed to make Ping request: %v", err)
+	}
+	t.Log("Ping OK!")
+}
+
 // Test CIS invoice with helper functions
 func TestNewCISInvoice(t *testing.T) {
 	pdvValues := [][]interface{}{

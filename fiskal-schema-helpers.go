@@ -13,24 +13,24 @@ import (
 //
 // Parameters:
 //
-//	dateTime (time.Time): The date and time of the invoice.
-//	centralized (bool): Indicates whether the sequence mark is centralized.
-//	invoiceNumber (uint): The unique number of the invoice.
-//	locationIdentifier (string): The identifier for the business location where the invoice was issued.
-//	registerDeviceID (uint): The identifier for the cash register device used to issue the invoice.
-//	pdvValues ([][]interface{}): A 2D array for VAT details (nullable).
-//	pnpValues ([][]interface{}): A 2D array for consumption tax details (nullable).
-//	ostaliPorValues ([][]interface{}): A 2D array for other tax details (nullable).
-//	iznosOslobPdv (string): The amount exempt from VAT (optional).
-//	iznosMarza (string): The margin amount (optional).
-//	iznosNePodlOpor (string): The amount not subject to taxation (optional).
-//	naknadeValues ([][]string): A 2D array for fees details (nullable).
-//	iznosUkupno (string): The total amount.
-//	nacinPlac (string): The payment method.
-//	oibOper (string): The OIB of the operator.
-//	nakDost (bool): Indicates whether the invoice is delivered.
-//	paragonBrRac (string): The paragon invoice number (optional).
-//	specNamj (string): Special purpose (optional).
+//   - dateTime (time.Time): The date and time of the invoice.
+//   - centralized (bool): Indicates whether the sequence mark is centralized.
+//   - invoiceNumber (uint): The unique number of the invoice.
+//   - locationIdentifier (string): The identifier for the business location where the invoice was issued.
+//   - registerDeviceID (uint): The identifier for the cash register device used to issue the invoice.
+//   - pdvValues ([][]interface{}): A 2D array for VAT details (nullable).
+//   - pnpValues ([][]interface{}): A 2D array for consumption tax details (nullable).
+//   - ostaliPorValues ([][]interface{}): A 2D array for other tax details (nullable).
+//   - iznosOslobPdv (string): The amount exempt from VAT (optional).
+//   - iznosMarza (string): The margin amount (optional).
+//   - iznosNePodlOpor (string): The amount not subject to taxation (optional).
+//   - naknadeValues ([][]string): A 2D array for fees details (nullable).
+//   - iznosUkupno (string): The total amount.
+//   - nacinPlac (string): The payment method.
+//   - oibOper (string): The OIB of the operator.
+//   - nakDost (bool): Indicates whether the invoice is delivered.
+//   - paragonBrRac (string): The paragon invoice number (optional).
+//   - specNamj (string): Special purpose (optional).
 //
 // Returns:
 //
