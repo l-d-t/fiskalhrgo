@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/pkcs12"
 )
 
-// CertManager holds the private key, public certificate, and additional info
-type CertManager struct {
+// certManager holds the private key, public certificate, and additional info
+type certManager struct {
 	privateKey  *rsa.PrivateKey
 	publicCert  *x509.Certificate
 	caCerts     []*x509.Certificate // This holds any CA certs
@@ -25,8 +25,8 @@ type CertManager struct {
 	expire_days uint16
 }
 
-func newCertManager() *CertManager {
-	return &CertManager{
+func newCertManager() *certManager {
+	return &certManager{
 		privateKey:  nil,
 		publicCert:  nil,
 		caCerts:     []*x509.Certificate{},
@@ -40,8 +40,8 @@ func newCertManager() *CertManager {
 	}
 }
 
-// DecodeP12Cert loads and decodes a P12 certificate, extracting the private key, public cert, and CA certificates
-func (cm *CertManager) DecodeP12Cert(certPath string, password string) error {
+// decodeP12Cert loads and decodes a P12 certificate, extracting the private key, public cert, and CA certificates
+func (cm *certManager) decodeP12Cert(certPath string, password string) error {
 	// Read the P12 file
 	certBytes, err := os.ReadFile(certPath)
 	if err != nil {
@@ -120,7 +120,7 @@ func (cm *CertManager) DecodeP12Cert(certPath string, password string) error {
 	}
 
 	// Extract the OIB
-	oib, err := cm.GetCertOIB()
+	oib, err := cm.getCertOIB()
 	if err != nil {
 		return fmt.Errorf("error extracting OIB: %v", err)
 	}
@@ -132,8 +132,8 @@ func (cm *CertManager) DecodeP12Cert(certPath string, password string) error {
 	return nil
 }
 
-// GetCertOIB extracts the OIB from the certificate's subject information
-func (cm *CertManager) GetCertOIB() (string, error) {
+// getCertOIB extracts the OIB from the certificate's subject information
+func (cm *certManager) getCertOIB() (string, error) {
 	if cm.publicCert == nil {
 		return "", fmt.Errorf("certificate not loaded")
 	}
@@ -155,7 +155,7 @@ func (cm *CertManager) GetCertOIB() (string, error) {
 	return ex[1], nil
 }
 
-func (cm *CertManager) DisplayCertInfoText() string {
+func (cm *certManager) displayCertInfoText() string {
 	if cm.publicCert == nil {
 		return "No public certificate available."
 	}
@@ -179,7 +179,7 @@ func (cm *CertManager) DisplayCertInfoText() string {
 	return result
 }
 
-func (cm *CertManager) DisplayCertInfoMarkdown() string {
+func (cm *certManager) displayCertInfoMarkdown() string {
 	if cm.publicCert == nil {
 		return "No public certificate available."
 	}
@@ -203,7 +203,7 @@ func (cm *CertManager) DisplayCertInfoMarkdown() string {
 	return result
 }
 
-func (cm *CertManager) DisplayCertInfoHTML() string {
+func (cm *certManager) displayCertInfoHTML() string {
 	if cm.publicCert == nil {
 		return "<p>No public certificate available.</p>"
 	}
@@ -228,7 +228,7 @@ func (cm *CertManager) DisplayCertInfoHTML() string {
 	return result
 }
 
-func (cm *CertManager) DisplayCertInfoKeyPoints() [][2]string {
+func (cm *certManager) displayCertInfoKeyPoints() [][2]string {
 	var result [][2]string
 
 	if cm.publicCert == nil {

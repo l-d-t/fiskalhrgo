@@ -40,7 +40,7 @@ type FiskalEntity struct {
 	centralizedInvoiceNumber bool
 
 	// cert holds the certificate and private key used to sign invoices.
-	cert *CertManager
+	cert *certManager
 
 	// ciscert holds the public key, issuer, subject, serial number, and validity dates of a CIS certificate.
 	// It is used to check the signature on CIS responses and contains the SSL root CA pool for SSL verification.
@@ -89,7 +89,7 @@ type FiskalEntity struct {
 //
 // Returns:
 //   - (*FiskalEntity, error): A pointer to a new FiskalEntity instance with the provided values, or an error if the input is invalid.
-func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *CertManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
+func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *certManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
 
 	// Check if OIB is valid
 	if !ValidateOIB(oib) {
@@ -123,7 +123,7 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 		}
 
 		cert = newCertManager()
-		err := cert.DecodeP12Cert(cert_config[0], cert_config[1])
+		err := cert.decodeP12Cert(cert_config[0], cert_config[1])
 		if err != nil {
 			return nil, fmt.Errorf("cert decode fail: %v", err)
 		}
@@ -184,21 +184,21 @@ func (fe *FiskalEntity) DemoMode() bool {
 }
 
 func (fe *FiskalEntity) DisplayCertInfoText() string {
-	return fe.cert.DisplayCertInfoText()
+	return fe.cert.displayCertInfoText()
 }
 
 func (fe *FiskalEntity) DisplayCertInfoMarkdown() string {
-	return fe.cert.DisplayCertInfoMarkdown()
+	return fe.cert.displayCertInfoMarkdown()
 }
 
 func (fe *FiskalEntity) DisplayCertInfoHTML() string {
 
-	return fe.cert.DisplayCertInfoHTML()
+	return fe.cert.displayCertInfoHTML()
 }
 
 func (fe *FiskalEntity) DisplayCertInfoKeyPoints() [][2]string {
 
-	return fe.cert.DisplayCertInfoKeyPoints()
+	return fe.cert.displayCertInfoKeyPoints()
 }
 
 // GenerateZKI generates the ZKI (Zaštitni Kod Izdavatelja) based on the given data.

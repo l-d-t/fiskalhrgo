@@ -10,7 +10,7 @@ import (
 	"math/rand"
 )
 
-var testCert *CertManager
+var testCert *certManager
 var testEntity *FiskalEntity
 
 var certPath string
@@ -57,7 +57,7 @@ func TestLoadCert(t *testing.T) {
 
 	testCert = newCertManager()
 	// Load the certificate
-	err := testCert.DecodeP12Cert(certPath, certPassword)
+	err := testCert.decodeP12Cert(certPath, certPassword)
 
 	if err != nil {
 		t.Fatalf("Failed to load certificate: %v", err)
@@ -93,14 +93,14 @@ func TestDisplayCertInfo(t *testing.T) {
 
 	t.Log("Cert Text:")
 	// Display the certificate information
-	fmt.Print(testCert.DisplayCertInfoText())
+	fmt.Print(testCert.displayCertInfoText())
 
 	t.Log("Cert Markdown:")
-	t.Log(testCert.DisplayCertInfoMarkdown())
+	t.Log(testCert.displayCertInfoMarkdown())
 	t.Log("Cert HTML:")
-	t.Log(testCert.DisplayCertInfoHTML())
+	t.Log(testCert.displayCertInfoHTML())
 	t.Log("Cert Key Points:")
-	for _, pair := range testCert.DisplayCertInfoKeyPoints() {
+	for _, pair := range testCert.displayCertInfoKeyPoints() {
 		t.Logf("%s: %s", pair[0], pair[1])
 	}
 }
@@ -109,7 +109,7 @@ func TestExtractOIB(t *testing.T) {
 	t.Logf("Testing OIB extraction...")
 
 	// Reuse the loaded certManager to extract the OIB
-	oib, err := testCert.GetCertOIB()
+	oib, err := testCert.getCertOIB()
 	if err != nil {
 		t.Fatalf("Failed to extract OIB: %v", err)
 	}
