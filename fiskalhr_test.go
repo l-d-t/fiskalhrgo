@@ -128,7 +128,7 @@ func TestExtractOIB(t *testing.T) {
 // Test without passing a loaded certificate
 func TestNewFiskalEntityStandalone(t *testing.T) {
 	t.Logf("Testing FiskalEntity with cert init creation...")
-	testEntityStandalone, err := NewFiskalEntity(testOIB, true, true, nil, true, certPath, certPassword)
+	testEntityStandalone, err := NewFiskalEntity(testOIB, true, "TEST3", true, true, nil, true, certPath, certPassword)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestNewFiskalEntityStandalone(t *testing.T) {
 func TestNewFiskalEntity(t *testing.T) {
 	t.Logf("Testing FiskalEntity with passing cert manager creation...")
 	var err error
-	testEntity, err = NewFiskalEntity(testOIB, true, true, testCert, true)
+	testEntity, err = NewFiskalEntity(testOIB, true, "TEST3", true, true, testCert, true)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestGenerateZKI(t *testing.T) {
 	t.Logf("Testing ZKI generation...")
 
 	// Reuse the loaded certManager to generate ZKI
-	zki, err := testEntity.GenerateZKI(time.Now(), 1, "LOC1", 1, "100.00")
+	zki, err := testEntity.GenerateZKI(time.Now(), 1, 1, "100.00")
 	if err != nil {
 		t.Fatalf("Failed to generate ZKI: %v", err)
 	}
@@ -195,7 +195,7 @@ func TestKnownZKI(t *testing.T) {
 	}
 
 	// Reuse the loaded certManager to generate ZKI
-	zki, err := testEntity.GenerateZKI(parsedTime, 13, "TEST3", 1, "90.00")
+	zki, err := testEntity.GenerateZKI(parsedTime, 13, 1, "90.00")
 	if err != nil {
 		t.Fatalf("Failed to generate ZKI: %v", err)
 	}
@@ -255,9 +255,7 @@ func TestNewCISInvoice(t *testing.T) {
 	}
 
 	dateTime := time.Now()
-	centralized := true
 	brOznRac := uint(rand.Intn(6901) + 100)
-	oznPosPr := "001"
 	oznNapUr := uint(1)
 	iznosUkupno := "1330.50"
 	nacinPlac := "G"
@@ -268,9 +266,7 @@ func TestNewCISInvoice(t *testing.T) {
 
 	invoice, zki, err := testEntity.NewCISInvoice(
 		dateTime,
-		centralized,
 		brOznRac,
-		oznPosPr,
 		oznNapUr,
 		pdvValues,
 		pnpValues,
@@ -303,20 +299,16 @@ func TestNewCISInvoice(t *testing.T) {
 		t.Errorf("Expected DatVrijeme %v, got %v", dateTime.Format("2006-01-02T15:04:05"), invoice.DatVrijeme)
 	}
 
-	expectedOznSlijed := "P"
-	if !centralized {
-		expectedOznSlijed = "N"
-	}
-	if invoice.OznSlijed != expectedOznSlijed {
-		t.Errorf("Expected OznSlijed %v, got %v", expectedOznSlijed, invoice.OznSlijed)
+	if invoice.OznSlijed != "P" {
+		t.Errorf("Expected OznSlijed %v, got %v", "P", invoice.OznSlijed)
 	}
 
 	if invoice.BrRac.BrOznRac != brOznRac {
 		t.Errorf("Expected BrOznRac %v, got %v", brOznRac, invoice.BrRac.BrOznRac)
 	}
 
-	if invoice.BrRac.OznPosPr != oznPosPr {
-		t.Errorf("Expected OznPosPr %v, got %v", oznPosPr, invoice.BrRac.OznPosPr)
+	if invoice.BrRac.OznPosPr != "TEST3" {
+		t.Errorf("Expected OznPosPr %v, got %v", "TEST3", invoice.BrRac.OznPosPr)
 	}
 
 	if invoice.BrRac.OznNapUr != oznNapUr {

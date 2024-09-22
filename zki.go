@@ -13,7 +13,7 @@ import (
 )
 
 // GenerateZKI generates the ZKI based on the given data
-func (entity *FiskalEntity) GenerateZKI(issueDateTime time.Time, invoiceNumber uint, location string, deviceID uint, totalAmount string) (string, error) {
+func (entity *FiskalEntity) GenerateZKI(issueDateTime time.Time, invoiceNumber uint, deviceID uint, totalAmount string) (string, error) {
 
 	formattedTime := issueDateTime.Format("02.01.2006 15:04:05")
 
@@ -27,7 +27,7 @@ func (entity *FiskalEntity) GenerateZKI(issueDateTime time.Time, invoiceNumber u
 	deviceIDStr := strconv.FormatUint(uint64(deviceID), 10)
 
 	// Concatenate the required data (oib, date, invoice number, location, device ID, total amount)
-	guardCode := entity.OIB + formattedTime + invoiceNumberStr + location + deviceIDStr + totalAmount
+	guardCode := entity.OIB + formattedTime + invoiceNumberStr + entity.locationID + deviceIDStr + totalAmount
 
 	// Hash the concatenated data using SHA1
 	hashed := sha1.Sum([]byte(guardCode))

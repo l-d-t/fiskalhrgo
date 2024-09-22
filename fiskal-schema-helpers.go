@@ -37,9 +37,7 @@ import (
 //	(*RacunType, string, error): A pointer to a new RacunType instance with the provided values, generated zki or an error if the input is invalid.
 func (fe *FiskalEntity) NewCISInvoice(
 	dateTime time.Time,
-	centralized bool,
 	invoiceNumber uint,
-	locationIdentifier string,
 	registerDeviceID uint,
 	pdvValues [][]interface{},
 	pnpValues [][]interface{},
@@ -60,7 +58,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 
 	// Determine the sequence mark
 	oznSlijed := "N"
-	if centralized {
+	if fe.centralizedInvoiceNumber {
 		oznSlijed = "P"
 	}
 
@@ -101,7 +99,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 	// Create the BrojRacunaType instance
 	brRac := &BrojRacunaType{
 		BrOznRac: invoiceNumber,
-		OznPosPr: locationIdentifier,
+		OznPosPr: fe.locationID,
 		OznNapUr: registerDeviceID,
 	}
 
@@ -112,7 +110,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 		return nil, "", errors.New("NacinPlac must be one of the following values: G, K, O, T, C (deprecated)")
 	}
 
-	zki, err := fe.GenerateZKI(dateTime, invoiceNumber, locationIdentifier, registerDeviceID, iznosUkupno)
+	zki, err := fe.GenerateZKI(dateTime, invoiceNumber, registerDeviceID, iznosUkupno)
 
 	if err != nil {
 		return nil, "", err
