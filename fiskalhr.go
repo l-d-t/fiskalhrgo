@@ -32,7 +32,7 @@ type FiskalEntity struct {
 	centralizedInvoiceNumber bool
 
 	// cert holds the certificate and private key used to sign invoices.
-	cert *certManager
+	cert *CertManager
 
 	// ciscert holds the public key, issuer, subject, serial number, and validity dates of a CIS certificate.
 	// It is used to check the signature on CIS responses and contains the SSL root CA pool for SSL verification.
@@ -81,7 +81,7 @@ type FiskalEntity struct {
 //
 // Returns:
 //   - (*FiskalEntity, error): A pointer to a new FiskalEntity instance with the provided values, or an error if the input is invalid.
-func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *certManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
+func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *CertManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
 
 	// Check if OIB is valid
 	if !ValidateOIB(oib) {
@@ -115,7 +115,7 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 		}
 
 		cert = newCertManager()
-		err := cert.decodeP12Cert(cert_config[0], cert_config[1])
+		err := cert.DecodeP12Cert(cert_config[0], cert_config[1])
 		if err != nil {
 			return nil, fmt.Errorf("cert decode fail: %v", err)
 		}
@@ -148,4 +148,29 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 		ciscert:                  CIScert,
 		url:                      url,
 	}, nil
+}
+
+// OIB returns the taxpayer's identification number.
+func (fe *FiskalEntity) OIB() string {
+	return fe.oib
+}
+
+// SustPDV indicates whether the entity is part of the VAT system.
+func (fe *FiskalEntity) SustPDV() bool {
+	return fe.sustPDV
+}
+
+// LocationID returns the unique identifier of the location where the fiscalization is taking place.
+func (fe *FiskalEntity) LocationID() string {
+	return fe.locationID
+}
+
+// CentralizedInvoiceNumber specifies whether invoice numbers are centralized per locationID. Or each register device within the location has its own sequence of invoice numbers.
+func (fe *FiskalEntity) CentralizedInvoiceNumber() bool {
+	return fe.centralizedInvoiceNumber
+}
+
+// DemoMode indicates whether the entity is in demo mode (Demo Fiskalizacija).
+func (fe *FiskalEntity) DemoMode() bool {
+	return fe.demoMode
 }
