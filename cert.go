@@ -255,3 +255,33 @@ func (cm *certManager) displayCertInfoKeyPoints() [][2]string {
 
 	return result
 }
+
+// getCertORG returns the organization name from the certificate.
+// The organization name is typically included in the certificate's subject field.
+func (cm *certManager) getCertORG() string {
+	return cm.certORG
+}
+
+// getCertSERIAL returns the serial number from the certificate.
+// The serial number is a unique identifier assigned by the certificate issuer.
+func (cm *certManager) getCertSERIAL() string {
+	return cm.certSERIAL
+}
+
+// isExpired returns whether the certificate is expired.
+// This indicates if the certificate's validity period has ended.
+func (cm *certManager) isExpired() bool {
+	return cm.expired
+}
+
+// isExpiringSoon returns whether the certificate is expiring soon.
+// This indicates if the certificate is approaching its expiration date.
+func (cm *certManager) isExpiringSoon() bool {
+	return cm.expire_soon
+}
+
+// daysUntilExpire returns the number of days until the certificate expires.
+// This provides a countdown of days remaining before the certificate becomes invalid.
+func (cm *certManager) daysUntilExpire() uint16 {
+	return cm.expire_days
+}
