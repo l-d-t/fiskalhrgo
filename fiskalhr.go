@@ -174,3 +174,21 @@ func (fe *FiskalEntity) CentralizedInvoiceNumber() bool {
 func (fe *FiskalEntity) DemoMode() bool {
 	return fe.demoMode
 }
+
+func (fe *FiskalEntity) DisplayCertInfoText() string {
+	return fe.cert.DisplayCertInfoText()
+}
+
+func (fe *FiskalEntity) DisplayCertInfoMarkdown() string {
+	return fe.cert.DisplayCertInfoMarkdown()
+}
+
+func (fe *FiskalEntity) DisplayCertInfoHTML() string {
+
+	return fe.cert.DisplayCertInfoHTML()
+}
+
+func (fe *FiskalEntity) DisplayCertInfoKeyPoints() [][2]string {
+
+	return fe.cert.DisplayCertInfoKeyPoints()
+}
