@@ -10,7 +10,6 @@ import (
 	"math/rand"
 )
 
-var testCert *certManager
 var testEntity *FiskalEntity
 
 var certPath string
@@ -55,7 +54,7 @@ ___________.__        __           .__    ___ _____________    ________
 func TestLoadCert(t *testing.T) {
 	t.Logf("Testing certificate loading...")
 
-	testCert = newCertManager()
+	testCert := newCertManager()
 	// Load the certificate
 	err := testCert.decodeP12Cert(certPath, certPassword)
 
@@ -90,6 +89,13 @@ func TestLoadCert(t *testing.T) {
 
 func TestDisplayCertInfo(t *testing.T) {
 	t.Logf("Testing certificate display...")
+	testCert := newCertManager()
+	// Load the certificate
+	err := testCert.decodeP12Cert(certPath, certPassword)
+
+	if err != nil {
+		t.Fatalf("Failed to load certificate: %v", err)
+	}
 
 	t.Log("Cert Text:")
 	// Display the certificate information
@@ -107,7 +113,13 @@ func TestDisplayCertInfo(t *testing.T) {
 
 func TestExtractOIB(t *testing.T) {
 	t.Logf("Testing OIB extraction...")
+	testCert := newCertManager()
+	// Load the certificate
+	err := testCert.decodeP12Cert(certPath, certPassword)
 
+	if err != nil {
+		t.Fatalf("Failed to load certificate: %v", err)
+	}
 	// Reuse the loaded certManager to extract the OIB
 	oib, err := testCert.getCertOIB()
 	if err != nil {
@@ -126,23 +138,10 @@ func TestExtractOIB(t *testing.T) {
 }
 
 // Test without passing a loaded certificate
-func TestNewFiskalEntityStandalone(t *testing.T) {
-	t.Logf("Testing FiskalEntity with cert init creation...")
-	testEntityStandalone, err := NewFiskalEntity(testOIB, true, "TEST3", true, true, nil, true, certPath, certPassword)
-	if err != nil {
-		t.Fatalf("Failed: %v", err)
-	}
-	if !testEntityStandalone.cert.init_ok {
-		t.Fatalf("Failed to initialize CertManager")
-	}
-}
-
-// Test with passing the loaded certificate
-// Also init global testEntity for other tests
 func TestNewFiskalEntity(t *testing.T) {
-	t.Logf("Testing FiskalEntity with passing cert manager creation...")
+	t.Logf("Testing FiskalEntity with cert init creation...")
 	var err error
-	testEntity, err = NewFiskalEntity(testOIB, true, "TEST3", true, true, testCert, true)
+	testEntity, err = NewFiskalEntity(testOIB, true, "TEST3", true, true, true, certPath, certPassword)
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}

@@ -66,8 +66,6 @@ type FiskalEntity struct {
 //   - centralizedInvoiceNumber: If true, invoice numbers are centralized for the entire location.
 //     If not, each register device within the location has its own sequence of invoice numbers.
 //   - demoMode: If true, the entity is in demo mode and will use the demo CIS certificate and endpoint.
-//   - certManager: If nil, a new CertManager is initialized using the provided certificate path and password.
-//     Otherwise, the existing CertManager is used as is.
 //   - chk_expired: If true, the entity creation will fail if the certificate is expired (recommended).
 //   - certPath, certPassword: These are required if certManager is nil and are used to load the certificate.
 //
@@ -89,7 +87,7 @@ type FiskalEntity struct {
 //
 // Returns:
 //   - (*FiskalEntity, error): A pointer to a new FiskalEntity instance with the provided values, or an error if the input is invalid.
-func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *certManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
+func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, chk_expired bool, certPath string, certPassword string) (*FiskalEntity, error) {
 
 	// Check if OIB is valid
 	if !ValidateOIB(oib) {
@@ -99,6 +97,11 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 	//check if locationID is valid
 	if !ValidateLocationID(locationID) {
 		return nil, errors.New("invalid locationID")
+	}
+
+	//check path is valid
+	if !IsFileReadable(certPath) {
+		return nil, errors.New("invalid certificate path or file not readable")
 	}
 
 	var CIScert *signatureCheckCIScert
@@ -114,23 +117,14 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 		return nil, fmt.Errorf("failed to get CIS public key and CA pool: %v", CIScerterror)
 	}
 
-	// Initialize a new CertManager if it's nil, otherwise use the provided one
-	if cert == nil {
-
-		// Check if the certificate path and password are provided
-		if len(cert_config) < 2 {
-			return nil, errors.New("certificate path and password are required")
-		}
-
-		cert = newCertManager()
-		err := cert.decodeP12Cert(cert_config[0], cert_config[1])
-		if err != nil {
-			return nil, fmt.Errorf("cert decode fail: %v", err)
-		}
+	cert := newCertManager()
+	err := cert.decodeP12Cert(certPath, certPassword)
+	if err != nil {
+		return nil, fmt.Errorf("certificate decode fail: %v", err)
 	}
 
 	if !cert.init_ok {
-		return nil, errors.New("failed to initialize CertManager")
+		return nil, errors.New("failed to initialize the certificate manager")
 	}
 	if cert.certOIB != oib {
 		return nil, errors.New("OIB does not match the certificate")

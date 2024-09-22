@@ -1,6 +1,8 @@
 package fiskalhrgo
 
 import (
+	"os"
+	"path/filepath"
 	"regexp"
 )
 
@@ -49,4 +51,34 @@ func ValidateLocationID(locationID string) bool {
 	// Regex pattern to match valid locationID
 	validLocationID := regexp.MustCompile(`^[a-zA-Z0-9]{1,20}$`)
 	return validLocationID.MatchString(locationID)
+}
+
+// IsFileReadable checks if the given file exists and is readable.
+// It returns true if the file exists and is readable, otherwise false.
+func IsFileReadable(filePath string) bool {
+	// Get the absolute path
+	absPath, err := filepath.Abs(filePath)
+	if err != nil {
+		return false
+	}
+
+	// Check if the file exists
+	info, err := os.Stat(absPath)
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	// Check if the path is a regular file
+	if !info.Mode().IsRegular() {
+		return false
+	}
+
+	// Check if the file is readable
+	file, err := os.Open(absPath)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+
+	return true
 }
