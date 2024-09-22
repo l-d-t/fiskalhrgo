@@ -18,7 +18,7 @@ func (entity *FiskalEntity) GenerateZKI(issueDateTime time.Time, invoiceNumber u
 	formattedTime := issueDateTime.Format("02.01.2006 15:04:05")
 
 	// Ensure totalAmount is a valid decimal string with 2 decimal places
-	if !isValidCurrencyFormat(totalAmount) {
+	if !IsValidCurrencyFormat(totalAmount) {
 		return "", errors.New("invalid totalAmount format; expected a string with 2 decimal places (e.g., 100.00)")
 	}
 

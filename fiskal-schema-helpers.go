@@ -189,7 +189,7 @@ func Naknade(values [][]string) (*NaknadeType, error) {
 		}
 		feeName := v[0]
 		feeAmount := v[1]
-		if !isValidCurrencyFormat(feeAmount) {
+		if !IsValidCurrencyFormat(feeAmount) {
 			return nil, errors.New("the second element of each inner array must be a valid currency format (fee amount)")
 		}
 		naknade[i] = &NaknadaType{NazivN: feeName, IznosN: feeAmount}
@@ -243,14 +243,14 @@ func OtherTaxes(values [][]interface{}) (*OstaliPoreziType, error) {
 		if !ok {
 			return nil, errors.New("the third element of each inner array must be a string (base)")
 		}
-		if !isValidCurrencyFormat(base) {
+		if !IsValidCurrencyFormat(base) {
 			return nil, errors.New("the third element of each inner array must be a valid currency format (base)")
 		}
 		amount, ok := v[3].(string)
 		if !ok {
 			return nil, errors.New("the fourth element of each inner array must be a string (amount)")
 		}
-		if !isValidCurrencyFormat(amount) {
+		if !IsValidCurrencyFormat(amount) {
 			return nil, errors.New("the fourth element of each inner array must be a valid currency format (amount)")
 		}
 		porezi[i] = &PorezOstaloType{Naziv: name, Stopa: rate, Osnovica: base, Iznos: amount}
@@ -300,14 +300,14 @@ func NewPNP(values [][]interface{}) (*PorezNaPotrosnjuType, error) {
 		if !ok {
 			return nil, errors.New("the second element of each inner array must be a string (tax base)")
 		}
-		if !isValidCurrencyFormat(taxBase) {
+		if !IsValidCurrencyFormat(taxBase) {
 			return nil, errors.New("the second element of each inner array must be a valid currency format (tax base)")
 		}
 		taxAmount, ok := v[2].(string)
 		if !ok {
 			return nil, errors.New("the third element of each inner array must be a string (tax amount)")
 		}
-		if !isValidCurrencyFormat(taxAmount) {
+		if !IsValidCurrencyFormat(taxAmount) {
 			return nil, errors.New("the third element of each inner array must be a valid currency format (tax amount)")
 		}
 		porezi[i] = &PorezType{Stopa: taxRate, Osnovica: taxBase, Iznos: taxAmount}
@@ -357,14 +357,14 @@ func NewPdv(values [][]interface{}) (*PdvType, error) {
 		if !ok {
 			return nil, errors.New("the second element of each inner array must be a string (tax base)")
 		}
-		if !isValidCurrencyFormat(taxBase) {
+		if !IsValidCurrencyFormat(taxBase) {
 			return nil, errors.New("the second element of each inner array must be a valid currency format (tax base)")
 		}
 		taxAmount, ok := v[2].(string)
 		if !ok {
 			return nil, errors.New("the third element of each inner array must be a string (tax amount)")
 		}
-		if !isValidCurrencyFormat(taxAmount) {
+		if !IsValidCurrencyFormat(taxAmount) {
 			return nil, errors.New("the third element of each inner array must be a valid currency format (tax amount)")
 		}
 		porezi[i] = &PorezType{Stopa: taxRate, Osnovica: taxBase, Iznos: taxAmount}

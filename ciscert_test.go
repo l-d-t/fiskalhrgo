@@ -13,7 +13,7 @@ func TestParseAndVerifyEmbeddedCertsDemo(t *testing.T) {
 	t.Logf("Testing embedded CIS demo certificate...")
 
 	// Parse and verify the embedded CIS demo certificate
-	cert, err := GetDemoPublicKey()
+	cert, err := getDemoPublicKey()
 	if err != nil {
 		t.Fatalf("Failed to parse and verify embedded CIS demo certificate: %v", err)
 	}
@@ -36,7 +36,7 @@ func TestParseAndVerifyEmbeddedCertsProd(t *testing.T) {
 	t.Logf("Testing embedded CIS production certificate...")
 
 	// Parse and verify the embedded CIS production certificate
-	cert, err := GetProductionPublicKey()
+	cert, err := getProductionPublicKey()
 	if err != nil {
 		t.Fatalf("Failed to parse and verify embedded CIS production certificate: %v", err)
 	}

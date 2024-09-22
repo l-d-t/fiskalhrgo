@@ -11,29 +11,29 @@ import (
 	"time"
 )
 
-// SOAPEnvelope represents a SOAP envelope
-type SOAPEnvelope struct {
-	XMLName xml.Name `xml:"soapenv:Envelope"`
-	XmlnsT  string   `xml:"xmlns:tns,attr"` // Declare the tns namespace
-	Xmlns   string   `xml:"xmlns:soapenv,attr"`
-	Body    SOAPBody `xml:"soapenv:Body"`
+// iSOAPEnvelope represents a SOAP envelope
+type iSOAPEnvelope struct {
+	XMLName xml.Name  `xml:"soapenv:Envelope"`
+	XmlnsT  string    `xml:"xmlns:tns,attr"` // Declare the tns namespace
+	Xmlns   string    `xml:"xmlns:soapenv,attr"`
+	Body    iSOAPBody `xml:"soapenv:Body"`
 }
 
-// SOAPBody represents the body of a SOAP envelope
-type SOAPBody struct {
+// iSOAPBody represents the body of a SOAP envelope
+type iSOAPBody struct {
 	XMLName xml.Name `xml:"soapenv:Body"`
 	Content []byte   `xml:",innerxml"`
 }
 
-// SOAPEnvelopeNoNamespace represents a SOAP envelope without namespace (for CIS responses)
+// iSOAPEnvelopeNoNamespace represents a SOAP envelope without namespace (for CIS responses)
 // This to be more flexible and permissive on unmarhaling responses.
-type SOAPEnvelopeNoNamespace struct {
-	XMLName xml.Name            `xml:"Envelope"`
-	Body    SOAPBodyNoNamespace `xml:"Body"`
+type iSOAPEnvelopeNoNamespace struct {
+	XMLName xml.Name             `xml:"Envelope"`
+	Body    iSOAPBodyNoNamespace `xml:"Body"`
 }
 
-// SOAPBodyNoNamespace represents the body of a SOAP envelope without namespace (for CIS responses)
-type SOAPBodyNoNamespace struct {
+// iSOAPBodyNoNamespace represents the body of a SOAP envelope without namespace (for CIS responses)
+type iSOAPBodyNoNamespace struct {
 	XMLName xml.Name `xml:"Body"`
 	Content []byte   `xml:",innerxml"`
 }
@@ -61,10 +61,10 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
 	}
 
 	// Prepare the SOAP envelope with the payload
-	soapEnvelope := SOAPEnvelope{
+	soapEnvelope := iSOAPEnvelope{
 		XmlnsT: DefaultNamespace,
 		Xmlns:  "http://schemas.xmlsoap.org/soap/envelope/",
-		Body:   SOAPBody{Content: xmlPayload},
+		Body:   iSOAPBody{Content: xmlPayload},
 	}
 	// Marshal the SOAP envelope to XML
 	marshaledEnvelope, err := xml.Marshal(soapEnvelope)
@@ -93,7 +93,7 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
 	}
 
 	// Parse the SOAP response
-	var soapResp SOAPEnvelopeNoNamespace
+	var soapResp iSOAPEnvelopeNoNamespace
 	err = xml.Unmarshal(body, &soapResp)
 	if err != nil {
 		return body, resp.StatusCode, fmt.Errorf("failed to unmarshal SOAP response: %w", err)

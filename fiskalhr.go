@@ -32,7 +32,7 @@ type FiskalEntity struct {
 	centralizedInvoiceNumber bool
 
 	// cert holds the certificate and private key used to sign invoices.
-	cert *CertManager
+	cert *certManager
 
 	// ciscert holds the public key, issuer, subject, serial number, and validity dates of a CIS certificate.
 	// It is used to check the signature on CIS responses and contains the SSL root CA pool for SSL verification.
@@ -81,7 +81,7 @@ type FiskalEntity struct {
 //
 // Returns:
 //   - (*FiskalEntity, error): A pointer to a new FiskalEntity instance with the provided values, or an error if the input is invalid.
-func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *CertManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
+func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedInvoiceNumber bool, demoMode bool, cert *certManager, chk_expired bool, cert_config ...string) (*FiskalEntity, error) {
 
 	// Check if OIB is valid
 	if !ValidateOIB(oib) {
@@ -92,9 +92,9 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 	var CIScerterror error
 
 	if demoMode {
-		CIScert, CIScerterror = GetDemoPublicKey()
+		CIScert, CIScerterror = getDemoPublicKey()
 	} else {
-		CIScert, CIScerterror = GetProductionPublicKey()
+		CIScert, CIScerterror = getProductionPublicKey()
 	}
 
 	if CIScerterror != nil {
@@ -109,8 +109,8 @@ func NewFiskalEntity(oib string, sustavPDV bool, locationID string, centralizedI
 			return nil, errors.New("certificate path and password are required")
 		}
 
-		cert = NewCertManager()
-		err := cert.DecodeP12Cert(cert_config[0], cert_config[1])
+		cert = newCertManager()
+		err := cert.decodeP12Cert(cert_config[0], cert_config[1])
 		if err != nil {
 			return nil, fmt.Errorf("cert decode fail: %v", err)
 		}

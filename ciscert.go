@@ -33,8 +33,8 @@ type signatureCheckCIScert struct {
 	SSLverifyPoll *x509.CertPool
 }
 
-// ParseAndVerifyEmbeddedCerts parses the embedded certificates, verifies the chain, and returns the public key of the newest valid certificate
-func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*signatureCheckCIScert, error) {
+// parseAndVerifyEmbeddedCerts parses the embedded certificates, verifies the chain, and returns the public key of the newest valid certificate
+func parseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*signatureCheckCIScert, error) {
 	var newestCert *x509.Certificate
 	var roots *x509.CertPool
 
@@ -136,11 +136,11 @@ func ParseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 }
 
 // Get demo public key
-func GetDemoPublicKey() (*signatureCheckCIScert, error) {
-	return ParseAndVerifyEmbeddedCerts(demoCISCert, "certDemo", "democis*.pem")
+func getDemoPublicKey() (*signatureCheckCIScert, error) {
+	return parseAndVerifyEmbeddedCerts(demoCISCert, "certDemo", "democis*.pem")
 }
 
 // Get production public key
-func GetProductionPublicKey() (*signatureCheckCIScert, error) {
-	return ParseAndVerifyEmbeddedCerts(prodCISCert, "certProd", "fiskalcis*.pem")
+func getProductionPublicKey() (*signatureCheckCIScert, error) {
+	return parseAndVerifyEmbeddedCerts(prodCISCert, "certProd", "fiskalcis*.pem")
 }
