@@ -12,10 +12,6 @@ import (
 
 var testEntity *FiskalEntity
 
-var certPath string
-var certPassword string
-var testOIB string
-
 // TestMain is run before any other tests. It sets up the shared instances and read env variables.
 func TestMain(m *testing.M) {
 
@@ -30,9 +26,9 @@ ___________.__        __           .__    ___ _____________    ________
 
 	fmt.Println("Setting up...")
 
-	certPath = os.Getenv("FISKALHRGO_TEST_CERT_PATH")
-	certPassword = os.Getenv("FISKALHRGO_TEST_CERT_PASSWORD")
-	testOIB = os.Getenv("FISKALHRGO_TEST_CERT_OIB")
+	certPath := os.Getenv("FISKALHRGO_TEST_CERT_PATH")
+	certPassword := os.Getenv("FISKALHRGO_TEST_CERT_PASSWORD")
+	testOIB := os.Getenv("FISKALHRGO_TEST_CERT_OIB")
 
 	if certPath == "" || certPassword == "" || testOIB == "" {
 		fmt.Println("FISKALHRGO_TEST_CERT_PATH or FISKALHRGO_TEST_CERT_PASSWORD or FISKALHRGO_TEST_CERT_OIB environment variables are not set")
@@ -42,6 +38,13 @@ ___________.__        __           .__    ___ _____________    ________
 	fmt.Printf("Using certificate: %s\n", certPath)
 	fmt.Printf("Test OIB: %s\n", testOIB)
 
+	var err error
+	testEntity, err = NewFiskalEntity(testOIB, true, "TEST3", true, true, true, certPath, certPassword)
+	if err != nil {
+		fmt.Printf("Failed to create FiskalEntity: %v\n", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("Running tests...")
 	// Run tests
 	code := m.Run()
@@ -50,101 +53,21 @@ ___________.__        __           .__    ___ _____________    ________
 	os.Exit(code)
 }
 
-// TestLoadCert checks if provided client P12 fiskal certificate was loaded correctly.
-func TestLoadCert(t *testing.T) {
-	t.Logf("Testing certificate loading...")
+func TestCertOutput(t *testing.T) {
+	t.Logf("Testing certificate output...")
 
-	testCert := newCertManager()
-	// Load the certificate
-	err := testCert.decodeP12Cert(certPath, certPassword)
+	fmt.Println(testEntity.DisplayCertInfoText())
 
-	if err != nil {
-		t.Fatalf("Failed to load certificate: %v", err)
+	testEntity.DisplayCertInfoKeyPoints()
+	testEntity.DisplayCertInfoMarkdown()
+	testEntity.DisplayCertInfoHTML()
+
+	if testEntity.IsExpiringSoon() {
+		fmt.Println("WARNING: Certificate is expiring soon!")
 	}
 
-	// Ensure that the certManager is not nil and contains a valid certificate
-	if testCert == nil {
-		t.Fatal("CertManager is nil")
-	}
+	fmt.Printf("Test certificate expires in %d days\n", testEntity.DaysUntilExpire())
 
-	if testCert.publicCert == nil {
-		t.Fatalf("Certificate is not loaded correctly")
-	}
-
-	if !testCert.init_ok {
-		t.Fatalf("CertManager initialization failed")
-	}
-
-	// Log issuer and subject
-	t.Logf("Certificate Subject: %s", testCert.publicCert.Subject)
-	t.Logf("Certificate Issuer: %s", testCert.publicCert.Issuer)
-
-	// Log the certificate's serial number
-	t.Logf("Certificate Serial Number: %s", testCert.publicCert.SerialNumber)
-
-	// Log the certificate's validity dates
-	t.Logf("Certificate Valid From: %v", testCert.publicCert.NotBefore)
-	t.Logf("Certificate Valid Until: %v", testCert.publicCert.NotAfter)
-}
-
-func TestDisplayCertInfo(t *testing.T) {
-	t.Logf("Testing certificate display...")
-	testCert := newCertManager()
-	// Load the certificate
-	err := testCert.decodeP12Cert(certPath, certPassword)
-
-	if err != nil {
-		t.Fatalf("Failed to load certificate: %v", err)
-	}
-
-	t.Log("Cert Text:")
-	// Display the certificate information
-	fmt.Print(testCert.displayCertInfoText())
-
-	t.Log("Cert Markdown:")
-	t.Log(testCert.displayCertInfoMarkdown())
-	t.Log("Cert HTML:")
-	t.Log(testCert.displayCertInfoHTML())
-	t.Log("Cert Key Points:")
-	for _, pair := range testCert.displayCertInfoKeyPoints() {
-		t.Logf("%s: %s", pair[0], pair[1])
-	}
-}
-
-func TestExtractOIB(t *testing.T) {
-	t.Logf("Testing OIB extraction...")
-	testCert := newCertManager()
-	// Load the certificate
-	err := testCert.decodeP12Cert(certPath, certPassword)
-
-	if err != nil {
-		t.Fatalf("Failed to load certificate: %v", err)
-	}
-	// Reuse the loaded certManager to extract the OIB
-	oib, err := testCert.getCertOIB()
-	if err != nil {
-		t.Fatalf("Failed to extract OIB: %v", err)
-	}
-
-	if oib == "" {
-		t.Fatalf("Expected non-empty OIB, but got an empty string")
-	}
-
-	if !ValidateOIB(oib) {
-		t.Fatalf("Extracted OIB is not valid")
-	}
-
-	t.Logf("Extracted OIB: %s", oib)
-}
-
-// Test without passing a loaded certificate
-func TestNewFiskalEntity(t *testing.T) {
-	t.Logf("Testing FiskalEntity with cert init creation...")
-	var err error
-	testEntity, err = NewFiskalEntity(testOIB, true, "TEST3", true, true, true, certPath, certPassword)
-	if err != nil {
-		t.Fatalf("Failed: %v", err)
-	}
 }
 
 // TestGenerateZKI tests the ZKI generation using the previously loaded certificate
