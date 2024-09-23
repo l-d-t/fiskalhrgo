@@ -273,8 +273,8 @@ func (entity *FiskalEntity) GenerateZKI(issueDateTime time.Time, invoiceNumber u
 	return zki, nil
 }
 
-// CISEcho sends an echo request to CIS and processes the response.
-func (fe *FiskalEntity) CISEcho(text string) (string, error) {
+// EchoRequest sends an echo request to CIS and processes the response.
+func (fe *FiskalEntity) EchoRequest(text string) (string, error) {
 	// Create an XML payload for the echo request
 	echoRequest := &EchoRequest{
 		Xmlns: DefaultNamespace,
@@ -307,7 +307,7 @@ func (fe *FiskalEntity) CISEcho(text string) (string, error) {
 //   - error if the ping failed
 func (fe *FiskalEntity) PingCIS() error {
 	echoText := "Hello, CIS, from FiskalhrGo!"
-	response, err := fe.CISEcho(echoText)
+	response, err := fe.EchoRequest(echoText)
 	if err != nil {
 		return fmt.Errorf("CIS ping failed: %v", err)
 	}

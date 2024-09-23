@@ -146,7 +146,7 @@ func TestCISEcho(t *testing.T) {
 	t.Logf("Sending message to CIS: %s", msg)
 
 	// Reuse the loaded certManager to generate ZKI
-	resp, err := testEntity.CISEcho(msg)
+	resp, err := testEntity.EchoRequest(msg)
 	if err != nil {
 		t.Fatalf("Failed to make CISEcho request: %v", err)
 	}
