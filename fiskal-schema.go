@@ -223,14 +223,14 @@ type PdvType struct {
 // PorezOstaloType ...
 type PorezOstaloType struct {
 	Naziv    string `xml:"tns:Naziv"`
-	Stopa    int    `xml:"tns:Stopa"`
+	Stopa    string `xml:"tns:Stopa"`
 	Osnovica string `xml:"tns:Osnovica"`
 	Iznos    string `xml:"tns:Iznos"`
 }
 
 // PorezType ...
 type PorezType struct {
-	Stopa    int    `xml:"tns:Stopa"`
+	Stopa    string `xml:"tns:Stopa"`
 	Osnovica string `xml:"tns:Osnovica"`
 	Iznos    string `xml:"tns:Iznos"`
 }

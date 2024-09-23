@@ -41,7 +41,7 @@ type iSOAPBodyNoNamespace struct {
 // GetResponse wraps the XML payload in a SOAP envelope, makes an HTTPS request, and returns the extracted response body.
 // - Input: XML payload
 // - Output: Response body, error, HTTP status code
-func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
+func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool, id string) ([]byte, int, error) {
 	if fe.ciscert == nil || fe.ciscert.SSLverifyPoll == nil {
 		return nil, 0, errors.New("CIScert or SSLverifyPoll is not initialized")
 	}
@@ -58,6 +58,16 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
 			TLSClientConfig: tlsConfig,
 		},
 		Timeout: cistimeout * time.Second, // Set a timeout for the request
+	}
+
+	if sign {
+		// Sign the XML payload
+		signedXML, err := fe.signXML(xmlPayload, id)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to sign XML: %w", err)
+		}
+		xmlPayload = signedXML
+		fmt.Println(string(xmlPayload))
 	}
 
 	// Prepare the SOAP envelope with the payload
@@ -97,6 +107,14 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte) ([]byte, int, error) {
 	err = xml.Unmarshal(body, &soapResp)
 	if err != nil {
 		return body, resp.StatusCode, fmt.Errorf("failed to unmarshal SOAP response: %w", err)
+	}
+
+	if sign {
+		// Verify the signature
+		_, err := fe.verifyXML(soapResp.Body.Content)
+		if err != nil {
+			return soapResp.Body.Content, resp.StatusCode, fmt.Errorf("failed to verify signature: %w", err)
+		}
 	}
 
 	// Return the inner content of the SOAP Body (the actual response)

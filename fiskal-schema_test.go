@@ -31,7 +31,7 @@ func TestRacunZahtjevMarshal(t *testing.T) {
 			OznSlijed:   "P",
 			BrRac:       &BrojRacunaType{100, "POS1", 1},
 			IznosUkupno: "150.50",
-			Pdv:         &PdvType{[]*PorezType{{25, "120.40", "30.10"}}},
+			Pdv:         &PdvType{[]*PorezType{{"25.00", "120.40", "30.10"}}},
 			NacinPlac:   "G",
 			OibOper:     "98765432100",
 			ZastKod:     "c3b2ecf807f56e294fbb3d536aad0f6c",

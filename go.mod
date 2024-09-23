@@ -6,3 +6,5 @@ require (
 	github.com/google/uuid v1.6.0
 	golang.org/x/crypto v0.27.0
 )
+
+require github.com/ucarion/c14n v0.1.0

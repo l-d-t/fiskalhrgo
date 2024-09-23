@@ -54,7 +54,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 	specNamj string,
 ) (*RacunType, string, error) {
 	// Format the date and time
-	formattedDate := dateTime.Format("2006-01-02T15:04:05")
+	formattedDate := dateTime.Format("02.01.2006T15:04:05")
 
 	// Determine the sequence mark
 	oznSlijed := "N"
@@ -150,7 +150,7 @@ func (fe *FiskalEntity) NewCISInvoice(
 func NewFiskalHeader() *ZaglavljeType {
 	return &ZaglavljeType{
 		IdPoruke:     uuid.New().String(),
-		DatumVrijeme: time.Now().Format("2006-01-02T15:04:05"),
+		DatumVrijeme: time.Now().Format("02.01.2006T15:04:05"),
 	}
 }
 
@@ -235,7 +235,7 @@ func OtherTaxes(values [][]interface{}) (*OstaliPoreziType, error) {
 		if !ok {
 			return nil, errors.New("the first element of each inner array must be a string (name)")
 		}
-		rate, ok := v[1].(int)
+		rate, ok := v[1].(string)
 		if !ok {
 			return nil, errors.New("the second element of each inner array must be an int (rate)")
 		}
@@ -292,7 +292,7 @@ func NewPNP(values [][]interface{}) (*PorezNaPotrosnjuType, error) {
 		if len(v) != 3 {
 			return nil, errors.New("each inner array must contain exactly three elements")
 		}
-		taxRate, ok := v[0].(int)
+		taxRate, ok := v[0].(string)
 		if !ok {
 			return nil, errors.New("the first element of each inner array must be an int (tax rate)")
 		}
@@ -349,7 +349,7 @@ func NewPdv(values [][]interface{}) (*PdvType, error) {
 		if len(v) != 3 {
 			return nil, errors.New("each inner array must contain exactly three elements")
 		}
-		taxRate, ok := v[0].(int)
+		taxRate, ok := v[0].(string)
 		if !ok {
 			return nil, errors.New("the first element of each inner array must be an int (tax rate)")
 		}

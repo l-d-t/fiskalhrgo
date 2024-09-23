@@ -170,15 +170,15 @@ func TestPing(t *testing.T) {
 // Test CIS invoice with helper functions
 func TestNewCISInvoice(t *testing.T) {
 	pdvValues := [][]interface{}{
-		{25, "1000.00", "250.00"},
+		{"25.00", "1000.00", "250.00"},
 	}
 
 	pnpValues := [][]interface{}{
-		{3, "1000.00", "30.00"},
+		{"3.00", "1000.00", "30.00"},
 	}
 
 	ostaliPorValues := [][]interface{}{
-		{"Other Tax", 5, "1000.00", "50.00"},
+		{"Other Tax", "5.00", "1000.00", "50.00"},
 	}
 
 	naknadeValues := [][]string{
@@ -202,9 +202,9 @@ func TestNewCISInvoice(t *testing.T) {
 		pdvValues,
 		pnpValues,
 		ostaliPorValues,
-		"0",
-		"0",
-		"0",
+		"0.00",
+		"0.00",
+		"0.00",
 		naknadeValues,
 		iznosUkupno,
 		nacinPlac,
@@ -226,8 +226,8 @@ func TestNewCISInvoice(t *testing.T) {
 		t.Errorf("Expected USustPdv true, got %v", invoice.USustPdv)
 	}
 
-	if invoice.DatVrijeme != dateTime.Format("2006-01-02T15:04:05") {
-		t.Errorf("Expected DatVrijeme %v, got %v", dateTime.Format("2006-01-02T15:04:05"), invoice.DatVrijeme)
+	if invoice.DatVrijeme != dateTime.Format("02.01.2006T15:04:05") {
+		t.Errorf("Expected DatVrijeme %v, got %v", dateTime.Format("02.01.2006T15:04:05"), invoice.DatVrijeme)
 	}
 
 	if invoice.OznSlijed != "P" {
@@ -296,48 +296,46 @@ func TestNewCISInvoice(t *testing.T) {
 		Zaglavlje: NewFiskalHeader(),
 		Racun:     invoice,
 		Xmlns:     DefaultNamespace,
-		IdAttr:    fmt.Sprintf("%d", brOznRac),
+		IdAttr:    generateUniqueID(),
 	}
 
 	t.Logf("Zahtijev UUID: %s", zahtjev.Zaglavlje.IdPoruke)
 	t.Logf("Zahtijev Timestamp: %s", zahtjev.Zaglavlje.DatumVrijeme)
 
 	// Marshal the RacunZahtjev to XML
-	xmlData, err := xml.MarshalIndent(zahtjev, "", "  ")
+	xmlData, err := xml.MarshalIndent(zahtjev, "", "")
 	if err != nil {
 		t.Fatalf("Error marshalling RacunZahtjev: %v", err)
 	}
 
 	t.Log(string(xmlData))
 
-	/* TODO: we need to implement proper xml signing and verification for this to make sense
-	         for now we get a response of the apropiate structure
-			 with expected error s004: Neispravan digitalni potpis.
-		// Lets send it to CIS and see if we get a response
-		body, status, errComm := testEntity.GetResponse(xmlData)
+	// Lets send it to CIS and see if we get a response
+	body, status, errComm := testEntity.GetResponse(xmlData, true, zahtjev.IdAttr)
 
-		t.Errorf("error in response: %v", errComm)
+	if errComm != nil {
+		t.Fatalf("Failed to make request: %v", errComm)
+	}
 
-		//unmarshad bodyu to get Racun Odgovor
-		var racunOdgovor RacunOdgovor
-		if err := xml.Unmarshal(body, &racunOdgovor); err != nil {
-			t.Fatalf("failed to unmarshal XML response: %v\n%v", err, string(body))
+	//unmarshad bodyu to get Racun Odgovor
+	var racunOdgovor RacunOdgovor
+	if err := xml.Unmarshal(body, &racunOdgovor); err != nil {
+		t.Fatalf("failed to unmarshal XML response: %v\n%v", err, string(body))
+	}
+
+	//output zaglavlje first all elements
+	t.Logf("Racun Odgovor IdPoruke: %s", racunOdgovor.Zaglavlje.IdPoruke)
+	t.Logf("Racun Odgovor DatumVrijeme: %s", racunOdgovor.Zaglavlje.DatumVrijeme)
+
+	if status != 200 {
+
+		//all errors one by one
+		for _, greska := range racunOdgovor.Greske.Greska {
+			t.Logf("Racun Odgovor Greska: %s: %s", greska.SifraGreske, greska.PorukaGreske)
 		}
 
-		//output zaglavlje first all elements
-		t.Logf("Racun Odgovor IdPoruke: %s", racunOdgovor.Zaglavlje.IdPoruke)
-		t.Logf("Racun Odgovor DatumVrijeme: %s", racunOdgovor.Zaglavlje.DatumVrijeme)
-
-		if status != 200 {
-
-			//all errors one by one
-			for _, greska := range racunOdgovor.Greske.Greska {
-				t.Logf("Racun Odgovor Greska: %s: %s", greska.SifraGreske, greska.PorukaGreske)
-			}
-
-		} else {
-			//output JIR: Jedinicni identifikator racuna
-			t.Logf("Racun Odgovor JIR: %s", racunOdgovor.Jir)
-		}
-	*/
+	} else {
+		//output JIR: Jedinicni identifikator racuna
+		t.Logf("Racun Odgovor JIR: %s", racunOdgovor.Jir)
+	}
 }
