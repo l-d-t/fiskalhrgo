@@ -303,7 +303,7 @@ func TestNewCISInvoice(t *testing.T) {
 	t.Logf("Zahtijev Timestamp: %s", zahtjev.Zaglavlje.DatumVrijeme)
 
 	// Marshal the RacunZahtjev to XML
-	xmlData, err := xml.MarshalIndent(zahtjev, "", "")
+	xmlData, err := xml.MarshalIndent(zahtjev, "", " ")
 	if err != nil {
 		t.Fatalf("Error marshalling RacunZahtjev: %v", err)
 	}
@@ -311,7 +311,7 @@ func TestNewCISInvoice(t *testing.T) {
 	t.Log(string(xmlData))
 
 	// Lets send it to CIS and see if we get a response
-	body, status, errComm := testEntity.GetResponse(xmlData, true, zahtjev.IdAttr)
+	body, status, errComm := testEntity.GetResponse(xmlData, true)
 
 	if errComm != nil {
 		t.Fatalf("Failed to make request: %v", errComm)

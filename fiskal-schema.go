@@ -6,22 +6,20 @@ const DefaultNamespace = "http://www.apis-it.hr/fin/2012/types/f73"
 
 // RacunZahtjev ...
 type RacunZahtjev struct {
-	XMLName     xml.Name       `xml:"tns:RacunZahtjev"`
-	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
-	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
-	Racun       *RacunType     `xml:"tns:Racun"`
-	DsSignature *SignatureType `xml:"ds:Signature"`
+	XMLName   xml.Name       `xml:"tns:RacunZahtjev"`
+	Xmlns     string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
+	IdAttr    string         `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun     *RacunType     `xml:"tns:Racun"`
 }
 
 // RacunOdgovor ...
 type RacunOdgovor struct {
-	XMLName     xml.Name              `xml:"RacunOdgovor"`
-	IdAttr      string                `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeOdgovorType `xml:"Zaglavlje"`
-	Jir         string                `xml:"Jir"`
-	Greske      *GreskeType           `xml:"Greske"`
-	DsSignature *SignatureType        `xml:"ds:Signature"`
+	XMLName   xml.Name              `xml:"RacunOdgovor"`
+	IdAttr    string                `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeOdgovorType `xml:"Zaglavlje"`
+	Jir       string                `xml:"Jir"`
+	Greske    *GreskeType           `xml:"Greske"`
 }
 
 // PrateciDokumentiZahtjev ...
@@ -31,47 +29,42 @@ type PrateciDokumentiZahtjev struct {
 	IdAttr          string               `xml:"Id,attr,omitempty"`
 	Zaglavlje       *ZaglavljeType       `xml:"tns:Zaglavlje"`
 	PrateciDokument *PrateciDokumentType `xml:"tns:PrateciDokument"`
-	DsSignature     *SignatureType       `xml:"ds:Signature"`
 }
 
 // PrateciDokumentiOdgovor ...
 type PrateciDokumentiOdgovor struct {
-	XMLName     xml.Name              `xml:"PrateciDokumentiOdgovor"`
-	IdAttr      string                `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeOdgovorType `xml:"Zaglavlje"`
-	Jir         string                `xml:"Jir"`
-	Greske      *GreskeType           `xml:"Greske"`
-	DsSignature *SignatureType        `xml:"ds:Signature"`
+	XMLName   xml.Name              `xml:"PrateciDokumentiOdgovor"`
+	IdAttr    string                `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeOdgovorType `xml:"Zaglavlje"`
+	Jir       string                `xml:"Jir"`
+	Greske    *GreskeType           `xml:"Greske"`
 }
 
 // RacunPDZahtjev ...
 type RacunPDZahtjev struct {
-	XMLName     xml.Name       `xml:"tns:RacunPDZahtjev"`
-	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
-	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
-	Racun       *RacunType     `xml:"tns:Racun"`
-	DsSignature *SignatureType `xml:"ds:Signature"`
+	XMLName   xml.Name       `xml:"tns:RacunPDZahtjev"`
+	Xmlns     string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
+	IdAttr    string         `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun     *RacunType     `xml:"tns:Racun"`
 }
 
 // RacunPDOdgovor ...
 type RacunPDOdgovor struct {
-	XMLName     xml.Name              `xml:"RacunPDOdgovor"`
-	IdAttr      string                `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeOdgovorType `xml:"Zaglavlje"`
-	Jir         string                `xml:"Jir"`
-	Greske      *GreskeType           `xml:"Greske"`
-	DsSignature *SignatureType        `xml:"ds:Signature"`
+	XMLName   xml.Name              `xml:"RacunPDOdgovor"`
+	IdAttr    string                `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeOdgovorType `xml:"Zaglavlje"`
+	Jir       string                `xml:"Jir"`
+	Greske    *GreskeType           `xml:"Greske"`
 }
 
 // PromijeniNacPlacZahtjev ...
 type PromijeniNacPlacZahtjev struct {
-	XMLName     xml.Name       `xml:"tns:PromijeniNacPlacZahtjev"`
-	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
-	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
-	Racun       *RacunType     `xml:"tns:Racun"`
-	DsSignature *SignatureType `xml:"ds:Signature"`
+	XMLName   xml.Name       `xml:"tns:PromijeniNacPlacZahtjev"`
+	Xmlns     string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
+	IdAttr    string         `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun     *RacunType     `xml:"tns:Racun"`
 }
 
 // PromijeniNacPlacOdgovor ...
@@ -81,17 +74,15 @@ type PromijeniNacPlacOdgovor struct {
 	Zaglavlje      *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	PorukaOdgovora *PorukaOdgovoraType   `xml:"PorukaOdgovora"`
 	Greske         *GreskeType           `xml:"Greske"`
-	DsSignature    *SignatureType        `xml:"ds:Signature"`
 }
 
 // NapojnicaZahtjev ...
 type NapojnicaZahtjev struct {
-	XMLName     xml.Name       `xml:"tns:NapojnicaZahtjev"`
-	Xmlns       string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
-	IdAttr      string         `xml:"Id,attr,omitempty"`
-	Zaglavlje   *ZaglavljeType `xml:"tns:Zaglavlje"`
-	Racun       *RacunType     `xml:"tns:Racun"`
-	DsSignature *SignatureType `xml:"ds:Signature"`
+	XMLName   xml.Name       `xml:"tns:NapojnicaZahtjev"`
+	Xmlns     string         `xml:"xmlns:tns,attr"` // Declare the tns namespace
+	IdAttr    string         `xml:"Id,attr,omitempty"`
+	Zaglavlje *ZaglavljeType `xml:"tns:Zaglavlje"`
+	Racun     *RacunType     `xml:"tns:Racun"`
 }
 
 // NapojnicaOdgovor ...
@@ -101,7 +92,6 @@ type NapojnicaOdgovor struct {
 	Zaglavlje      *ZaglavljeOdgovorType `xml:"Zaglavlje"`
 	PorukaOdgovora *PorukaOdgovoraType   `xml:"PorukaOdgovora"`
 	Greske         *GreskeType           `xml:"Greske"`
-	DsSignature    *SignatureType        `xml:"ds:Signature"`
 }
 
 // EchoRequest represents a simple request with a text body

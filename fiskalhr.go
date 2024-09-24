@@ -286,7 +286,7 @@ func (fe *FiskalEntity) EchoRequest(text string) (string, error) {
 		return "", fmt.Errorf("failed to marshal XML payload: %w", err)
 	}
 
-	body, _, err := fe.GetResponse(xmlPayload, false, "")
+	body, _, err := fe.GetResponse(xmlPayload, false)
 	if err != nil {
 		return "", err
 	}

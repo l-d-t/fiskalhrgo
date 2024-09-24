@@ -1,7 +1,6 @@
 package fiskalhrgo
 
 import (
-	"crypto/rsa"
 	"crypto/x509"
 	"embed"
 	"encoding/pem"
@@ -24,7 +23,7 @@ var prodCISCert embed.FS
 // type signatureCheckCIScert holds the public key, issuer, subject, serial number, and validity dates
 // of a CIS certificate to check signature on CIS responses. It also holds the SSL verify pool
 type signatureCheckCIScert struct {
-	PublicKey     *rsa.PublicKey
+	PublicCert    *x509.Certificate
 	Subject       string
 	Serial        string
 	Issuer        string
@@ -118,14 +117,8 @@ func parseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 		return nil, errors.New("no suitable certificate found")
 	}
 
-	// Extract the public key from the newest valid certificate
-	publicKey, ok := newestCert.PublicKey.(*rsa.PublicKey)
-	if !ok {
-		return nil, errors.New("public key is not of type RSA")
-	}
-
 	return &signatureCheckCIScert{
-		PublicKey:     publicKey,
+		PublicCert:    newestCert,
 		Subject:       newestCert.Subject.String(),
 		Serial:        newestCert.SerialNumber.String(),
 		Issuer:        newestCert.Issuer.String(),

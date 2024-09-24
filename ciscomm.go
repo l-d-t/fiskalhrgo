@@ -41,7 +41,7 @@ type iSOAPBodyNoNamespace struct {
 // GetResponse wraps the XML payload in a SOAP envelope, makes an HTTPS request, and returns the extracted response body.
 // - Input: XML payload
 // - Output: Response body, error, HTTP status code
-func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool, id string) ([]byte, int, error) {
+func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, error) {
 	if fe.ciscert == nil || fe.ciscert.SSLverifyPoll == nil {
 		return nil, 0, errors.New("CIScert or SSLverifyPoll is not initialized")
 	}
@@ -62,7 +62,7 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool, id string) ([]
 
 	if sign {
 		// Sign the XML payload
-		signedXML, err := fe.signXML(xmlPayload, id)
+		signedXML, err := fe.signXML(xmlPayload)
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to sign XML: %w", err)
 		}
@@ -113,7 +113,7 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool, id string) ([]
 		// Verify the signature
 		_, err := fe.verifyXML(soapResp.Body.Content)
 		if err != nil {
-			return soapResp.Body.Content, resp.StatusCode, fmt.Errorf("failed to verify signature: %w", err)
+			return soapResp.Body.Content, resp.StatusCode, fmt.Errorf("failed to verify CIS signature: %w", err)
 		}
 	}
 
