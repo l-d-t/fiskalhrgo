@@ -5,7 +5,11 @@
 / /   | \__ \   < (_| | / __  / _  \ / /_\\ (_) /\_/ 
 \/    |_|___/_|\_\__,_|_\/ /_/\/ \_/ \____/\___/\/         
 ```
-[![Test](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml/badge.svg)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/l-d-t/fiskalhrgo/test.yml?branch=main&label=Build%2FTest&link=https%3A%2F%2Fgithub.com%2Fl-d-t%2Ffiskalhrgo%2Factions%2Fworkflows%2Ftest.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/l-d-t/fiskalhrgo)](https://goreportcard.com/report/github.com/l-d-t/fiskalhrgo)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/l-d-t/fiskalhrgo)
+![GitHub License](https://img.shields.io/github/license/l-d-t/fiskalhrgo)
+
 
 # FiskalHR Go
 
