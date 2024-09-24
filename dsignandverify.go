@@ -28,7 +28,7 @@ func docC14N10(xmlData string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to parse XML: %v", err)
 	}
 
-	// Use the Canonical XML 1.0 algorithm from goxmldsig
+	// Use the Canonical XML 1.0 algorithm
 	canonicalizer := MakeC14N10RecCanonicalizer() // Without comments
 	canonicalizedXML, err := canonicalizer.Canonicalize(doc.Root())
 	if err != nil {

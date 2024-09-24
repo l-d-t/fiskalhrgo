@@ -130,6 +130,7 @@ type ZaglavljeOdgovorType struct {
 
 // RacunType represents the invoice type with various details required for fiscalization.
 type RacunType struct {
+	XMLName               xml.Name              `xml:"tns:Racun"`
 	Oib                   string                `xml:"tns:Oib"`
 	USustPdv              bool                  `xml:"tns:USustPdv"`
 	DatVrijeme            string                `xml:"tns:DatVrijeme"`

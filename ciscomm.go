@@ -70,7 +70,6 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, 
 			return nil, 0, fmt.Errorf("failed to sign XML: %w", err)
 		}
 		xmlPayload = signedXML
-		fmt.Println(string(xmlPayload))
 	}
 
 	// Prepare the SOAP envelope with the payload

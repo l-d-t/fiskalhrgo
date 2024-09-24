@@ -196,7 +196,7 @@ func TestNewCISInvoice(t *testing.T) {
 	oibOper := "12345678901"
 	nakDost := true
 	paragonBrRac := "12345"
-	specNamj := "Special Purpose"
+	specNamj := ""
 
 	invoice, zki, err := testEntity.NewCISInvoice(
 		dateTime,
@@ -294,51 +294,25 @@ func TestNewCISInvoice(t *testing.T) {
 		t.Errorf("Expected Naknade to be non-nil")
 	}
 
-	//Combine with zahtjev for final XML
-	zahtjev := RacunZahtjev{
-		Zaglavlje: NewFiskalHeader(),
-		Racun:     invoice,
-		Xmlns:     DefaultNamespace,
-		IdAttr:    generateUniqueID(),
-	}
-
-	t.Logf("Zahtijev UUID: %s", zahtjev.Zaglavlje.IdPoruke)
-	t.Logf("Zahtijev Timestamp: %s", zahtjev.Zaglavlje.DatumVrijeme)
-
-	// Marshal the RacunZahtjev to XML
-	xmlData, err := xml.MarshalIndent(zahtjev, "", " ")
+	//marshal invoice and log XML
+	xmlData, err := xml.MarshalIndent(invoice, "", " ")
 	if err != nil {
-		t.Fatalf("Error marshalling RacunZahtjev: %v", err)
+		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	t.Log(string(xmlData))
+	t.Logf("Invoice XML: %s", xmlData)
 
-	// Lets send it to CIS and see if we get a response
-	body, status, errComm := testEntity.GetResponse(xmlData, true)
+	// Send test invoice to CIS with InvoiceRequest
+	jir, zkiR, err := testEntity.InvoiceRequest(invoice)
 
-	if errComm != nil {
-		t.Fatalf("Failed to make request: %v", errComm)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	//unmarshad bodyu to get Racun Odgovor
-	var racunOdgovor RacunOdgovor
-	if err := xml.Unmarshal(body, &racunOdgovor); err != nil {
-		t.Fatalf("failed to unmarshal XML response: %v\n%v", err, string(body))
+	if zkiR != zki {
+		t.Errorf("Expected ZKI %v, got %v", zki, zkiR)
 	}
 
-	//output zaglavlje first all elements
-	t.Logf("Racun Odgovor IdPoruke: %s", racunOdgovor.Zaglavlje.IdPoruke)
-	t.Logf("Racun Odgovor DatumVrijeme: %s", racunOdgovor.Zaglavlje.DatumVrijeme)
+	t.Logf("We got a JIR!: %v, ZKI: %v", jir, zkiR)
 
-	if status != 200 {
-
-		//all errors one by one
-		for _, greska := range racunOdgovor.Greske.Greska {
-			t.Logf("Racun Odgovor Greska: %s: %s", greska.SifraGreske, greska.PorukaGreske)
-		}
-
-	} else {
-		//output JIR: Jedinicni identifikator racuna
-		t.Logf("Racun Odgovor JIR: %s", racunOdgovor.Jir)
-	}
 }

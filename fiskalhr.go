@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -318,4 +319,108 @@ func (fe *FiskalEntity) PingCIS() error {
 		return fmt.Errorf("CIS ping failed: unexpected response")
 	}
 	return nil
+}
+
+// InvoiceRequest sends an invoice request to the CIS (Croatian Fiscalization System) and processes the response.
+//
+// This function performs the following steps:
+//  1. Minimally validates the provided invoice for required fields
+//     (any business logic and math is the responsibility of the invoicing application using the library)
+//     PLEASE NOTE: the CIS also don't do any extensive validation of the invoice, only basic checks.
+//     so you could get a JIR back even if the invoice is not correct.
+//     But if you do that you can have problems later with inspecions or periodic CIS checks of the data.
+//     The library will send the data as is to the CIS.
+//     So please validate and chek the invoice data acording to you buinies logic
+//     before sending it to the CIS.
+//  2. Sends the XML request to the CIS and receives the response.
+//  3. Unmarshals the response XML to extract the response data.
+//  4. Checks for errors in the response and aggregates them if any are found.
+//  5. Returns the JIR (Unique Invoice Identifier) if the request was successful.
+//
+// Parameters:
+// - invoice: A pointer to a RacunType struct representing the invoice to be sent.
+//
+// Returns:
+// - A string representing the JIR (Unique Invoice Identifier) if the request was successful.
+// - A string representing the ZKI (Protection Code of the Issuer) from the invoice.
+// - An error if any issues occurred during the process.
+//
+// Possible errors:
+// - If the invoice is nil or something is invalid (only basic checks).
+// - If the SpecNamj field of the invoice is not empty.
+// - If the ZastKod field of the invoice is empty.
+// - If there is an error marshalling the request to XML.
+// - If there is an error making the request to the CIS.
+// - If there is an error unmarshalling the response XML.
+// - If the IdPoruke in the response does not match the request.
+// - If the response status is not 200 and there are errors in the response.
+// - If the JIR in the response is empty.
+// - If an unexpected error occurs.
+func (fe *FiskalEntity) InvoiceRequest(invoice *RacunType) (string, string, error) {
+
+	//some basic tests for invoice
+	if invoice == nil {
+		return "", "", errors.New("invoice is nil")
+	}
+
+	if invoice.SpecNamj != "" {
+		return "", "", errors.New("invoice SpecNamj must be empty")
+	}
+
+	if invoice.ZastKod == "" {
+		return "", "", errors.New("invoice ZKI (Zastitni Kod Izdavatelja) must be set")
+	}
+
+	//Combine with zahtjev for final XML
+	zahtjev := RacunZahtjev{
+		Zaglavlje: NewFiskalHeader(),
+		Racun:     invoice,
+		Xmlns:     DefaultNamespace,
+		IdAttr:    generateUniqueID(),
+	}
+
+	// Marshal the RacunZahtjev to XML
+	xmlData, err := xml.MarshalIndent(zahtjev, "", " ")
+	if err != nil {
+		return "", invoice.ZastKod, fmt.Errorf("error marshalling RacunZahtjev: %w", err)
+	}
+
+	// Let's send it to CIS
+	body, status, errComm := fe.GetResponse(xmlData, true)
+
+	if errComm != nil {
+		return "", invoice.ZastKod, fmt.Errorf("failed to make request: %w", errComm)
+	}
+
+	//unmarshad body to get Racun Odgovor
+	var racunOdgovor RacunOdgovor
+	if err := xml.Unmarshal(body, &racunOdgovor); err != nil {
+		return "", invoice.ZastKod, fmt.Errorf("failed to unmarshal XML response: %w", err)
+	}
+
+	if zahtjev.Zaglavlje.IdPoruke != racunOdgovor.Zaglavlje.IdPoruke {
+		return "", invoice.ZastKod, errors.New("IdPoruke mismatch")
+	}
+
+	if status != 200 {
+
+		// Aggregate all errors into a single error message
+		var errorMessages []string
+		for _, greska := range racunOdgovor.Greske.Greska {
+			errorMessages = append(errorMessages, fmt.Sprintf("%s: %s", greska.SifraGreske, greska.PorukaGreske))
+		}
+		if len(errorMessages) > 0 {
+			return "", invoice.ZastKod, fmt.Errorf("errors in response: %s", strings.Join(errorMessages, "; "))
+		}
+
+	} else {
+		if racunOdgovor.Jir != "" {
+			return racunOdgovor.Jir, invoice.ZastKod, nil
+		} else {
+			return "", invoice.ZastKod, errors.New("JIR is empty")
+		}
+	}
+
+	// Add a default return statement to handle unexpected cases
+	return "", invoice.ZastKod, errors.New("unexpected error")
 }
