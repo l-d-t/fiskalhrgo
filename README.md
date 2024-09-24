@@ -5,7 +5,7 @@
 / /   | \__ \   < (_| | / __  / _  \ / /_\\ (_) /\_/ 
 \/    |_|___/_|\_\__,_|_\/ /_/\/ \_/ \____/\___/\/         
 ```
-[![Test](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml)
+[![Test](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml/badge.svg)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml)
 
 # FiskalHR Go
 
