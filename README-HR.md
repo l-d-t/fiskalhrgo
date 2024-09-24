@@ -17,6 +17,10 @@ Temeljeno na ["Fiskalizacija" specifikaciji v2.5](https://www.porezna-uprava.hr/
 
 [README in English](README.md)
 
+##Zašto ovaj projekt?
+
+Iako postoji mnogo open-source implementacija libraryja za fiskalizaciju, one su uglavnom usmjerene na druge programske jezike. Međutim, nakon istraživanja postalo je jasno da je teško pronaći open-source rješenje u Go (Golang) jeziku. Kako bismo popunili tu prazninu, razvijamo čisti Go open-source library (paket) za fiskalizaciju. Pa, "let's Go!" ;)
+
 ## Značajke
 
 - Obrada i slanje računa CIS-u (Poreznoj upravi) radi usklađenosti sa zakonom.

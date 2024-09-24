@@ -17,6 +17,10 @@ Based on ["Fiskalizacija" specification v2.5](https://www.porezna-uprava.hr/HR_F
 
 [README in Croatian](README-HR.md)
 
+## Why this project?
+
+While there are numerous open-source implementations of Croatian fiscalization libraries available, they tend to focus on other programming languages. However, after some research, it became clear that an open-source solution in Go (Golang) is hard to come by. To fill this gap, we're developing a pure Go open-source Croatian fiscalization library (package). So here we Go! ;)
+
 ## Features
 
 - Process and send invoices to CIS (Croatian Tax Administration) for compliance the law.
