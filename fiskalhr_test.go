@@ -316,3 +316,52 @@ func TestNewCISInvoice(t *testing.T) {
 	t.Logf("We got a JIR!: %v, ZKI: %v", jir, zkiR)
 
 }
+
+func TestSimpleInvoiceFromReadme(t *testing.T) {
+
+	invoice, _, err := testEntity.NewCISInvoice(
+		time.Now(),
+		uint(1236), // invoice number
+		uint(1),    // register id number
+		[][]interface{}{ // PDV
+			{"25.00", "1000.00", "250.00"},
+		},
+		nil,    // PNP
+		nil,    // Other taxes
+		"0.00", // total amount of exemptions on the issued invoice.
+		// Exemptions in cases where goods are delivered or services are
+		// provided that are exempt from VAT payment.
+		"0.00", // amount subject to the special margin taxation procedure
+		// if exist
+		"0.00", // total amount not subject to taxation on the issued invoice.
+		// This information is submitted to the Tax Administration only
+		// if there is an amount on the invoice that is not subject to
+		// taxation.
+		nil,       // naknade
+		"1250.00", // total
+		"G",       // payment method G - cash, K - credit card, T -
+		// transfer, O - other, C - check (deprecated)
+		"12345678901", // operator OIB
+		false,         // late delivery, if previous attempt failed but the
+		// invoice was issued with just ZKI
+		"", // receipt book number, if the invoicing system was
+		// unusable and the invoice was issued manually, the
+		// number of the receipt book
+		"", // unused, reserved field for future or temporary
+		// unexpected use by the CIS, should be empty
+	)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	// Send test invoice to CIS with InvoiceRequest
+	jir, zkiR, err := testEntity.InvoiceRequest(invoice)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	t.Logf("We got a JIR!: %v, ZKI: %v", jir, zkiR)
+
+}
