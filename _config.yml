@@ -1,7 +1,8 @@
-title: FiskalHR Go - Croatian Fiscalization Library (Fiskalizacija)
+title: FiskalHR Go - Fiskalizacija
 description: >
   FiskalHR Go is an open-source Golang library designed for seamless integration with the Croatian fiscalization system in pure Go.
-  FiskalHR Go je open-source Golang modul dizajniran za jednostavnu integraciju s hrvatskim sustavom fiskalizacije u čistom Go jeziku.
+  <br>
+  FiskalHR Go je open-source Golang modul dizajniran za jednostavnu integraciju s fiskalizacijom u čistom Go jeziku.
 
 theme: jekyll-theme-hacker
 
