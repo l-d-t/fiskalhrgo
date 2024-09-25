@@ -190,3 +190,28 @@ Pridonosioci su dobrodošli! Možete doprinijeti razvoju na sljedeće načine:
 - Slanjem pull requesta za nove značajke ili poboljšanje postojećih (preporučeno prije kontaktirat i konzultirat se nego se posao napravi)
 
 Vaš doprinos je neprocjenjiv i pomaže nam u stvaranju boljeg proizvoda za zajdnicu.
+
+## Napomena za pokretanje testova
+
+Testove možete pokrenuti s detaljnim ispisom pomoću
+
+```bash
+go test -v
+```
+
+Prije pokretanja potrebno je postaviti određene varijable okoline.
+
+Varijabla okoline `CIS_P12_BASE64` mora sadržavati jednolinijski base64 enkodirani niz izvorne važeće Fiskalne potvrde u P12 formatu.
+Ovaj enkodirani niz je ključan za interakciju testova s CIS-om (Hrvatskim sustavom fiskalizacije).
+
+Za enkodiranje vaše P12 potvrde (npr. `fiskalDemo1.p12`) u jednolinijski base64 niz na Linux sustavu, upotrijebite sljedeću naredbu:
+
+```bash
+base64 -w 0 fiskal1.p12
+```
+
+Zatim postavite varijablu okoline `CIS_P12_BASE64` s enkodiranim nizom.
+
+Dodatno, provjerite da su varijable okoline `FISKALHRGO_TEST_CERT_PASSWORD` i `FISKALHRGO_TEST_CERT_OIB` postavljene s odgovarajućom lozinkom potvrde i OIB-om (Osobnim identifikacijskim brojem).
+
+Ovaj sustav se koristi za testove jer će se testovi izvoditi u CI (Kontinuiranoj integraciji), gdje se tajne, kao što su one na GitHubu, prenose putem varijabli okoline. Ovo čini upravljanje jednostavnim i praktičnim. Potvrda, lozinka i OIB za testove mogu se lako pohraniti kao GitHub Action tajne, na primjer.

@@ -188,3 +188,28 @@ Contributors are welcome! You can contribute to the development in the following
 - Submitting pull requests for new features or improving existing ones (recommended to contact and consult before doing the work)
 
 Your contribution is invaluable and helps us create a better product for the community.
+
+## Note for Running Tests
+
+You can run tests with verbose output with
+
+```bash
+go test -v
+```
+
+Before running some environment variables must be se
+
+The `CIS_P12_BASE64` environment variable must contain a single-line base64 encoded string of the original valid Fiskal certificate in P12 format.
+This encoded string is essential for the tests to  interact with the CIS (Croatian Fiscalization System).
+
+To encode your P12 certificate file (e.g., `fiskalDemo1.p12`) to a single-line base64 string on a Linux system, use the following command:
+
+```bash
+base64 -w 0 fiskal1.p12
+```
+
+Then, set the CIS_P12_BASE64 environment variable with the encoded string.
+
+Additionally, ensure that the `FISKALHRGO_TEST_CERT_PASSWORD` and `FISKALHRGO_TEST_CERT_OIB` environment variables are set with the appropriate certificate password and OIB (Personal Identification Number) respectively.
+
+This system is used for the tests because these tests will run in CI (Continuous Integration), so secrets, for example on GitHub, are passed as environment variables. This makes it easy and convenient to manage. The certificate, password, and OIB for tests can be easily stored as GitHub Action secrets, for example.

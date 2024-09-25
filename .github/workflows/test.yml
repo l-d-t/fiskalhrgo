@@ -19,7 +19,7 @@ jobs:
           - os: macos-latest
             arch: 386
     env:
-      FISKALHRGO_TEST_CERT_PATH: ${{ secrets.FISKALHRGO_TEST_CERT_PATH }}
+      CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
       FISKALHRGO_TEST_CERT_PASSWORD: ${{ secrets.FISKALHRGO_TEST_CERT_PASSWORD }}
       FISKALHRGO_TEST_CERT_OIB: ${{ secrets.FISKALHRGO_TEST_CERT_OIB }}
     steps:
@@ -30,44 +30,8 @@ jobs:
       with:
         go-version: 'stable'
 
-    - name: Set TEMP_DIR environment variable
-      run: echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Set TEMP_DIR environment variable for Windows
-      if: runner.os == 'Windows'
-      run: echo "TEMP_DIR=%TEMP%" >> $GITHUB_ENV
-      shell: cmd
-
-    - name: Decode and save the P12 certificate
-      run: |
-        go run -mod=mod - <<EOF
-        package main
-
-        import (
-            "encoding/base64"
-            "io/ioutil"
-            "os"
-        )
-
-        func main() {
-            data, err := base64.StdEncoding.DecodeString(os.Getenv("CIS_P12_BASE64"))
-            if err != nil {
-                panic(err)
-            }
-            err = ioutil.WriteFile(os.Getenv("TEMP_DIR")+"/fiskal.p12", data, 0644)
-            if err != nil {
-                panic(err)
-            }
-        }
-        EOF
-      env:
-        CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
-
     - name: Build
       run: go build -v ./...
 
     - name: Test
       run: go test -v ./...
-      env:
-        FISKALHRGO_TEST_CERT_PATH: $TEMP_DIR/fiskal.p12

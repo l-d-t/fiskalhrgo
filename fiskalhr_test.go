@@ -5,9 +5,11 @@ package fiskalhrgo
 // Copyright (c) contributors for their respective contributions. See https://github.com/l-d-t/fiskalhrgo/graphs/contributors
 
 import (
+	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -30,19 +32,55 @@ ___________.__        __           .__    ___ _____________    ________
 
 	fmt.Println("Setting up...")
 
-	certPath := os.Getenv("FISKALHRGO_TEST_CERT_PATH")
+	certBase64 := os.Getenv("CIS_P12_BASE64")
 	certPassword := os.Getenv("FISKALHRGO_TEST_CERT_PASSWORD")
 	testOIB := os.Getenv("FISKALHRGO_TEST_CERT_OIB")
 
-	if certPath == "" || certPassword == "" || testOIB == "" {
-		fmt.Println("FISKALHRGO_TEST_CERT_PATH or FISKALHRGO_TEST_CERT_PASSWORD or FISKALHRGO_TEST_CERT_OIB environment variables are not set")
+	if certBase64 == "" || certPassword == "" || testOIB == "" {
+		fmt.Println("CIS_P12_BASE64 or FISKALHRGO_TEST_CERT_PASSWORD or FISKALHRGO_TEST_CERT_OIB environment variables are not set")
+		fmt.Println(`
+		The CIS_P12_BASE64 environment variable must contain a single-line base64 
+		encoded string of the original valid Fiskal certificate in P12 format. This 
+		encoded string is essential for the tests to  interact with the CIS 
+		(Croatian Fiscalization System).
+		
+		To encode your P12 certificate file (e.g., fiskalDemo1.p12) to a single-line 
+		base64 string on a Linux system, use the following command:
+		
+			base64 -w 0 fiskal1.p12
+		
+		Then, set the CIS_P12_BASE64 environment variable with the encoded string.
+		
+		Additionally, ensure that the FISKALHRGO_TEST_CERT_PASSWORD and 
+		FISKALHRGO_TEST_CERT_OIB environment variables are set with the appropriate 
+		certificate password and OIB (Personal Identification Number) respectively.
+		
+		This system is used for the tests because these tests will run in CI 
+		(Continuous Integration), so secrets, for example on GitHub, are passed as 
+		environment variables. This makes it easy and convenient to manage. The 
+		certificate, password, and OIB for tests can be easily stored as GitHub 
+		Action secrets, for example.`)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Using certificate: %s\n", certPath)
 	fmt.Printf("Test OIB: %s\n", testOIB)
 
-	var err error
+	// Decode the base64 certificate
+	certData, err := base64.StdEncoding.DecodeString(certBase64)
+	if err != nil {
+		fmt.Printf("Failed to decode base64 certificate: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create a temporary file to store the certificate
+	tempDir := os.TempDir()
+	certPath := filepath.Join(tempDir, "fiskal.p12")
+	err = os.WriteFile(certPath, certData, 0644)
+	if err != nil {
+		fmt.Printf("Failed to write certificate to temp file: %v\n", err)
+		os.Exit(1)
+	}
+
 	testEntity, err = NewFiskalEntity(testOIB, true, "TEST3", true, true, true, certPath, certPassword)
 	if err != nil {
 		fmt.Printf("Failed to create FiskalEntity: %v\n", err)
