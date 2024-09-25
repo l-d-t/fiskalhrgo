@@ -1,27 +1,11 @@
 title: FiskalHR Go - Croatian Fiscalization Library (Fiskalizacija)
 description: >
   FiskalHR Go is an open-source Golang library designed for seamless integration with the Croatian fiscalization system in pure Go.
-  
+  <br>
   FiskalHR Go je open-source Golang modul dizajniran za jednostavnu integraciju s hrvatskim sustavom fiskalizacije u čistom Go jeziku.
 
-theme: minima
-
-# Minima specific settings, which are only available from Minima 3.0 onward.
-minima:
-  # Minima skin selection.
-  # Available skins are:
-  # classic	           Default, light color scheme.
-  # dark	             Dark variant of the classic skin.
-  # auto	             Adaptive skin based on the default classic and dark skins.
-  # solarized-light	   Light variant of solarized color scheme.
-  # solarized-dark	   Dark variant of solarized color scheme.
-  # solarized	         Adaptive skin for solarized color scheme skins.
-  skin: solarized-dark
+theme: hacker
 
 # Other optional configurations
 show_downloads: false
 google_analytics: 
-
-# Social links
-social:
-  - { platform: github,         user_url: "https://github.com/l-d-t/fiskalhrgo" }
