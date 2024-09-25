@@ -2,6 +2,8 @@ module github.com/l-d-t/fiskalhrgo
 
 go 1.22
 
+toolchain go1.23.1
+
 require (
 	github.com/beevik/etree v1.4.1
 	github.com/google/uuid v1.6.0
