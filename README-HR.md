@@ -7,6 +7,9 @@
 ```
 [![Test](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml/badge.svg)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/l-d-t/fiskalhrgo)](https://goreportcard.com/report/github.com/l-d-t/fiskalhrgo)
+![Go version](https://img.shields.io/badge/Go%20version-1.22%2B-blue)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/l-d-t/fiskalhrgo/latest?include_prereleases)
+![GitHub License](https://img.shields.io/github/license/l-d-t/fiskalhrgo)
 
 # FiskalHR Go
 
@@ -36,10 +39,13 @@ Iako postoji mnogo open-source implementacija libraryja za fiskalizaciju, one su
 - Ekstrakcija i vraćanje detalja certifikata kao što su javni ključ, izdavatelj, subjekt, serijski broj i razdoblje valjanosti.
 - Pomoćne funkcije za generiranje QR koda za ispis na računima u raznim formatima.
 
+### Go Verzija Kompatibilnost
+- Minimalna testirana i podržana verzija: **Go 1.22**
+- Preporučena verzija: **Go 1.23.1+** za najbolju izvedbu
+
 ## Instalacija
 
 U korijenu vašeg projekta preuzmite modul
-
 ```
 go get github.com/l-d-t/fiskalhrgo
 ```
@@ -57,6 +63,8 @@ import (
     "fmt"
     "log"
     "time"
+
+    "github.com/l-d-t/fiskalhrgo"
 )
 
 func main() {

@@ -7,6 +7,9 @@
 ```
 [![Test](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml/badge.svg)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/l-d-t/fiskalhrgo)](https://goreportcard.com/report/github.com/l-d-t/fiskalhrgo)
+![Go version](https://img.shields.io/badge/Go%20version-1.22%2B-blue)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/l-d-t/fiskalhrgo/latest?include_prereleases)
+![GitHub License](https://img.shields.io/github/license/l-d-t/fiskalhrgo)
 
 # FiskalHR Go
 
@@ -35,6 +38,10 @@ While there are numerous open-source implementations of Croatian fiscalization l
 - Extract and return certificate details such as public key, issuer, subject, serial number, and validity period.
 - Helper function to get data for QR code (that can be passed to a QR code generator of your choice)
 
+## Go Version Compatibility
+- Minimum tested and supported version: **Go 1.22**
+- Recommended version: **Go 1.23.1+** for best performance
+
 ## Installation
 
 In your project root get the module
@@ -55,6 +62,8 @@ import (
     "fmt"
     "log"
     "time"
+
+    "github.com/l-d-t/fiskalhrgo"
 )
 
 func main() {
