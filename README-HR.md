@@ -8,9 +8,10 @@
 [![Test](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml/badge.svg)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/test.yml)
 [![CodeQL](https://github.com/l-d-t/fiskalhrgo/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/l-d-t/fiskalhrgo/actions/workflows/github-code-scanning/codeql)
 [![Go Report Card](https://goreportcard.com/badge/github.com/l-d-t/fiskalhrgo)](https://goreportcard.com/report/github.com/l-d-t/fiskalhrgo)
-![Go version](https://img.shields.io/badge/Go%20version-1.22%2B-blue)
+![Go version](https://img.shields.io/badge/Go-1.22%2B-blue)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/l-d-t/fiskalhrgo/latest?include_prereleases)
 ![GitHub License](https://img.shields.io/github/license/l-d-t/fiskalhrgo)
+[![Go Reference](https://pkg.go.dev/badge/github.com/l-d-t/fiskalhrgo.svg)](https://pkg.go.dev/github.com/l-d-t/fiskalhrgo)
 
 # FiskalHR Go
 
