@@ -1,5 +1,18 @@
-title: FiskalHR Go
-description: A Go library for Croatian fiscalization (fiskalizacija).
-theme: jekyll-theme-midnight
+title: FiskalHR Go - Croatian Fiscalization Library
+description: FiskalHR Go is an open-source Go library designed for seamless integration with the Croatian fiscalization system, simplifying processes with embedded certificate verification.
+
+theme: minima
+
+# Enable dark mode
+minima:
+  skin: dark
+
+# Other optional configurations
 show_downloads: false
 google_analytics: 
+
+# Social links
+social:
+  website: https://ldt.hr
+  facebook: https://www.facebook.com/ldt01/
+  github: https://github.com/l-d-t
