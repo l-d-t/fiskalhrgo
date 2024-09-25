@@ -34,7 +34,7 @@ func (a SortedAttrs) Less(i, j int) bool {
 	}
 
 	// Next, namespace prefix declarations, sorted by prefix, come before
-	// anythign else.
+	// anything else.
 	if a[i].Space == xmlnsPrefix {
 		if a[j].Space == xmlnsPrefix {
 			return a[i].Key < a[j].Key

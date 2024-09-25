@@ -12,7 +12,7 @@ const expectedDemoSerial = "325450325973957308031939306065516468253"
 // Expected serial number of the embedded CIS production certificate currently in use
 const expectedProdSerial = "313300731601639444557048129613010882577"
 
-// Test embeded CIS demo certificate
+// Test embedded CIS demo certificate
 func TestParseAndVerifyEmbeddedCertsDemo(t *testing.T) {
 	t.Logf("Testing embedded CIS demo certificate...")
 
@@ -35,7 +35,7 @@ func TestParseAndVerifyEmbeddedCertsDemo(t *testing.T) {
 	}
 }
 
-// Test embeded CIS production certificate
+// Test embedded CIS production certificate
 func TestParseAndVerifyEmbeddedCertsProd(t *testing.T) {
 	t.Logf("Testing embedded CIS production certificate...")
 

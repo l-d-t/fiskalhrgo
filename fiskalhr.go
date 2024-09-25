@@ -329,9 +329,9 @@ func (fe *FiskalEntity) PingCIS() error {
 //     (any business logic and math is the responsibility of the invoicing application using the library)
 //     PLEASE NOTE: the CIS also don't do any extensive validation of the invoice, only basic checks.
 //     so you could get a JIR back even if the invoice is not correct.
-//     But if you do that you can have problems later with inspecions or periodic CIS checks of the data.
+//     But if you do that you can have problems later with inspections or periodic CIS checks of the data.
 //     The library will send the data as is to the CIS.
-//     So please validate and chek the invoice data acording to you buinies logic
+//     So please validate and chek the invoice data according to you business logic
 //     before sending it to the CIS.
 //  2. Sends the XML request to the CIS and receives the response.
 //  3. Unmarshals the response XML to extract the response data.

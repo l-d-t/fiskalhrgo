@@ -13,13 +13,13 @@ import (
 // v using encoding/xml in the context of the passed NSContext. If v implements
 // ElementKeeper, SetUnderlyingElement will be called on v with a reference to el.
 func NSUnmarshalElement(ctx NSContext, el *etree.Element, v interface{}) error {
-	detatched, err := NSDetatch(ctx, el)
+	detached, err := NSDetatch(ctx, el)
 	if err != nil {
 		return err
 	}
 
 	doc := etree.NewDocument()
-	doc.AddChild(detatched)
+	doc.AddChild(detached)
 	data, err := doc.WriteToBytes()
 	if err != nil {
 		return err
