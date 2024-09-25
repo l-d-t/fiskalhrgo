@@ -35,4 +35,23 @@ jobs:
 
     - name: Test
       run: go test -v ./...
-      
+
+  go122:
+    runs-on: ubuntu-latest
+    env:
+      CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
+      FISKALHRGO_TEST_CERT_PASSWORD: ${{ secrets.FISKALHRGO_TEST_CERT_PASSWORD }}
+      FISKALHRGO_TEST_CERT_OIB: ${{ secrets.FISKALHRGO_TEST_CERT_OIB }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go 1.22
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22'
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...

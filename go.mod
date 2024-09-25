@@ -1,6 +1,6 @@
 module github.com/l-d-t/fiskalhrgo
 
-go 1.23.1
+go 1.22
 
 require (
 	github.com/beevik/etree v1.4.1
