@@ -1,0 +1,5 @@
+title: FiskalHR Go
+description: A Go library for Croatian fiscalization (fiskalizacija).
+theme: jekyll-theme-midnight
+show_downloads: false
+google_analytics: 

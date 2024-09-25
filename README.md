@@ -12,6 +12,7 @@
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/l-d-t/fiskalhrgo/latest?include_prereleases)
 ![GitHub License](https://img.shields.io/github/license/l-d-t/fiskalhrgo)
 [![Go Reference](https://pkg.go.dev/badge/github.com/l-d-t/fiskalhrgo.svg)](https://pkg.go.dev/github.com/l-d-t/fiskalhrgo)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/l-d-t?label=Support%20Us&style=flat)](https://github.com/sponsors/l-d-t)
 
 # FiskalHR Go
 
@@ -219,7 +220,7 @@ To encode your P12 certificate file (e.g., `fiskalDemo1.p12`) to a single-line b
 base64 -w 0 fiskal1.p12
 ```
 
-Then, set the CIS_P12_BASE64 environment variable with the encoded string.
+Then, set the `CIS_P12_BASE64` environment variable with the encoded string.
 
 Additionally, ensure that the `FISKALHRGO_TEST_CERT_PASSWORD` and `FISKALHRGO_TEST_CERT_OIB` environment variables are set with the appropriate certificate password and OIB (Personal Identification Number) respectively.
 

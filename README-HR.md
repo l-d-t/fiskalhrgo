@@ -12,6 +12,7 @@
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/l-d-t/fiskalhrgo/latest?include_prereleases)
 ![GitHub License](https://img.shields.io/github/license/l-d-t/fiskalhrgo)
 [![Go Reference](https://pkg.go.dev/badge/github.com/l-d-t/fiskalhrgo.svg)](https://pkg.go.dev/github.com/l-d-t/fiskalhrgo)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/l-d-t?label=Podrži%20nas&style=flat)](https://github.com/sponsors/l-d-t)
 
 # FiskalHR Go
 
