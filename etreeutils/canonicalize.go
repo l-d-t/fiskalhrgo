@@ -1,6 +1,7 @@
+package etreeutils
+
 // SPDX-License-Identifier: Apache-2.0
 // This file is adapted from the github.com/russellhaering/goxmldsig project.
-package etreeutils
 
 import (
 	"sort"

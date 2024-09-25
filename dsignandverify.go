@@ -1,7 +1,8 @@
+package fiskalhrgo
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2024 L. D. T. d.o.o.
 // Copyright (c) contributors for their respective contributions. See https://github.com/l-d-t/fiskalhrgo/graphs/contributors
-package fiskalhrgo
 
 import (
 	"crypto"
