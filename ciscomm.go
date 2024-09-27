@@ -105,19 +105,19 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, 
 		return nil, resp.StatusCode, fmt.Errorf("failed to read response: %w", err)
 	}
 
+	if sign {
+		// Verify the signature
+		_, err := fe.verifyXML(body)
+		if err != nil {
+			return body, resp.StatusCode, fmt.Errorf("failed to verify CIS signature: %w", err)
+		}
+	}
+
 	// Parse the SOAP response
 	var soapResp iSOAPEnvelopeNoNamespace
 	err = xml.Unmarshal(body, &soapResp)
 	if err != nil {
 		return body, resp.StatusCode, fmt.Errorf("failed to unmarshal SOAP response: %w", err)
-	}
-
-	if sign {
-		// Verify the signature
-		_, err := fe.verifyXML(soapResp.Body.Content)
-		if err != nil {
-			return soapResp.Body.Content, resp.StatusCode, fmt.Errorf("failed to verify CIS signature: %w", err)
-		}
 	}
 
 	// Return the inner content of the SOAP Body (the actual response)

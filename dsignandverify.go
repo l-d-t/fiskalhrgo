@@ -21,29 +21,11 @@ func generateUniqueID() string {
 	return fmt.Sprintf("%x", time.Now().UnixNano())
 }
 
-// docC14N10 applies Canonical XML 1.0 (http://www.w3.org/TR/2001/REC-xml-c14n-20010315) to the input XML data
-func docC14N10(xmlData string) ([]byte, error) {
-	// Parse the input XML string into an etree.Document
-	doc := etree.NewDocument()
-	if err := doc.ReadFromString(xmlData); err != nil {
-		return nil, fmt.Errorf("failed to parse XML: %v", err)
-	}
-
-	// Use the Canonical XML 1.0 algorithm
-	canonicalizer := MakeC14N10RecCanonicalizer() // Without comments
-	canonicalizedXML, err := canonicalizer.Canonicalize(doc.Root())
-	if err != nil {
-		return nil, fmt.Errorf("failed to canonicalize the XML: %v", err)
-	}
-
-	return canonicalizedXML, nil
-}
-
 // doc14n applies Exclusive Canonical XML (http://www.w3.org/2001/10/xml-exc-c14n#) to the input XML data
-func doc14n(xmlData string) ([]byte, error) {
+func doc14n(xmlData []byte) ([]byte, error) {
 	// Parse the input XML string into an etree.Document
 	doc := etree.NewDocument()
-	if err := doc.ReadFromString(xmlData); err != nil {
+	if err := doc.ReadFromBytes(xmlData); err != nil {
 		return nil, fmt.Errorf("failed to parse XML: %v", err)
 	}
 
@@ -136,7 +118,7 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 	}
 
 	// Canonicalize the XML document
-	xmlCanonical, err := doc14n(string(xmlRequest))
+	xmlCanonical, err := doc14n(xmlRequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to canonicalize XML document: %v", err)
 	}
@@ -154,7 +136,7 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 	// Convert the SignedInfo element to a string
 	signedInfoDocument := etree.NewDocument()
 	signedInfoDocument.SetRoot(signedInfoElement)
-	signedInfoString, err := signedInfoDocument.WriteToString()
+	signedInfoString, err := signedInfoDocument.WriteToBytes()
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize SignedInfo: %v", err)
 	}
@@ -193,7 +175,19 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 	return output, nil
 }
 
-// verifyXML verifies the signed XML document
+// verifyXML is currently a placeholder function for verifying signed XML documents.
+// It always returns true without performing any actual verification and should not be used in production environments
+// until proper XML signature verification is fully implemented.
+//
+// The primary challenge is the absence of a reliable pure Go implementation for the Canonicalization Method
+// (http://www.w3.org/TR/2001/REC-xml-c14n-20010315). Several libraries were evaluated, but all encountered subtle
+// issues during implementation. Without a robust xml canonicalization solution, xml signature verification is not possible.
+//
+// While the library supports Exclusive Canonicalization (http://www.w3.org/2001/10/xml-exc-c14n#), which suffices
+// for signing requests, the Croatian CIS system's responses use non-exclusive canonicalization, preventing verification at this time.
+//
+// This limitation will remain unresolved until a suitable library is found or a custom implementation is built,
+// or until fixes are contributed and merged into existing libraries.
 func (fe *FiskalEntity) verifyXML(xmlData []byte) (bool, error) {
 	return true, nil
 }
