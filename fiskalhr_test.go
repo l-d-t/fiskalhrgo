@@ -231,11 +231,7 @@ func TestNewCISInvoice(t *testing.T) {
 	brOznRac := uint(rand.Intn(6901) + 100)
 	oznNapUr := uint(1)
 	iznosUkupno := "1330.50"
-	nacinPlac := "G"
 	oibOper := "12345678901"
-	nakDost := true
-	paragonBrRac := "12345"
-	specNamj := ""
 
 	invoice, zki, err := testEntity.NewCISInvoice(
 		dateTime,
@@ -249,11 +245,8 @@ func TestNewCISInvoice(t *testing.T) {
 		"0.00",
 		naknadeValues,
 		iznosUkupno,
-		nacinPlac,
+		CISCash,
 		oibOper,
-		nakDost,
-		paragonBrRac,
-		specNamj,
 	)
 
 	if err != nil {
@@ -292,8 +285,8 @@ func TestNewCISInvoice(t *testing.T) {
 		t.Errorf("Expected IznosUkupno %v, got %v", iznosUkupno, invoice.IznosUkupno)
 	}
 
-	if invoice.NacinPlac != nacinPlac {
-		t.Errorf("Expected NacinPlac %v, got %v", nacinPlac, invoice.NacinPlac)
+	if invoice.NacinPlac != "G" {
+		t.Errorf("Expected NacinPlac G, got %v", invoice.NacinPlac)
 	}
 
 	if invoice.OibOper != oibOper {
@@ -302,18 +295,6 @@ func TestNewCISInvoice(t *testing.T) {
 
 	if invoice.ZastKod != zki {
 		t.Errorf("Expected ZastKod %v, got %v", zki, invoice.ZastKod)
-	}
-
-	if invoice.NakDost != nakDost {
-		t.Errorf("Expected NakDost %v, got %v", nakDost, invoice.NakDost)
-	}
-
-	if invoice.ParagonBrRac != paragonBrRac {
-		t.Errorf("Expected ParagonBrRac %v, got %v", paragonBrRac, invoice.ParagonBrRac)
-	}
-
-	if invoice.SpecNamj != specNamj {
-		t.Errorf("Expected SpecNamj %v, got %v", specNamj, invoice.SpecNamj)
 	}
 
 	// Additional checks for nullable fields
@@ -342,7 +323,7 @@ func TestNewCISInvoice(t *testing.T) {
 	t.Logf("Invoice XML: %s", xmlData)
 
 	// Send test invoice to CIS with InvoiceRequest
-	jir, zkiR, err := testEntity.InvoiceRequest(invoice)
+	jir, zkiR, err := invoice.InvoiceRequest()
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -378,16 +359,9 @@ func TestSimpleInvoiceFromReadme(t *testing.T) {
 		// taxation.
 		nil,       // naknade
 		"1250.00", // total
-		"G",       // payment method G - cash, K - credit card, T -
+		CISCash,   // payment method G - cash, K - credit card, T -
 		// transfer, O - other, C - check (deprecated)
 		"12345678901", // operator OIB
-		false,         // late delivery, if previous attempt failed but the
-		// invoice was issued with just ZKI
-		"", // receipt book number, if the invoicing system was
-		// unusable and the invoice was issued manually, the
-		// number of the receipt book
-		"", // unused, reserved field for future or temporary
-		// unexpected use by the CIS, should be empty
 	)
 
 	if err != nil {
@@ -395,7 +369,7 @@ func TestSimpleInvoiceFromReadme(t *testing.T) {
 	}
 
 	// Send test invoice to CIS with InvoiceRequest
-	jir, zkiR, err := testEntity.InvoiceRequest(invoice)
+	jir, zkiR, err := invoice.InvoiceRequest()
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)

@@ -11,15 +11,9 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"time"
 
 	"github.com/beevik/etree"
 )
-
-// generateUniqueID generates a unique ID
-func generateUniqueID() string {
-	return fmt.Sprintf("%x", time.Now().UnixNano())
-}
 
 // doc14n applies Exclusive Canonical XML (http://www.w3.org/2001/10/xml-exc-c14n#) to the input XML data
 func doc14n(xmlData []byte) ([]byte, error) {

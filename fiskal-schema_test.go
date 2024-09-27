@@ -27,7 +27,7 @@ func TestEchoRequestMarshal(t *testing.T) {
 // Test for RacunZahtjev structure
 func TestRacunZahtjevMarshal(t *testing.T) {
 	racun := RacunZahtjev{
-		Zaglavlje: NewFiskalHeader(),
+		Zaglavlje: newFiskalHeader(),
 		Racun: &RacunType{
 			Oib:         "12345678901",
 			USustPdv:    true,

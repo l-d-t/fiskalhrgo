@@ -4,7 +4,13 @@ package fiskalhrgo
 // Copyright (c) 2024 L. D. T. d.o.o.
 // Copyright (c) contributors for their respective contributions. See https://github.com/l-d-t/fiskalhrgo/graphs/contributors
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+)
 
 const DefaultNamespace = "http://www.apis-it.hr/fin/2012/types/f73"
 
@@ -154,6 +160,15 @@ type RacunType struct {
 	PrateciDokument       *PrateciDokument      `xml:"tns:PrateciDokument,omitempty"`
 	PromijenjeniNacinPlac string                `xml:"tns:PromijenjeniNacinPlac,omitempty"`
 	Napojnica             *NapojnicaType        `xml:"tns:Napojnica,omitempty"`
+
+	// Additional functional non XML fields
+	pointerToEntity    *FiskalEntity // Pointer to the FiskalEntity
+	oldEntityForOldZKI *FiskalEntity // Pointer to the old FiskalEntity for the old ZKI
+	// This is used in the edge case that the ZKI was generated with one certificate and the fiscalization failed
+	// But the certificate expired or had to be changed and now fiscalization have to be repeated with new certificate
+	// If we replace the original ZKI its a problem we already gave the invoice with old ZKI out
+	// So we have to keep the old ZKI and validate it with the old certificate before signing and sending with new one
+	// In any case this is set by IhaveZKIwithExpiredCertificateEdgeCase(EntityWithOldCertLoaded *FiskalEntity) method
 }
 
 // PrateciDokumentType ...
@@ -168,8 +183,8 @@ type PrateciDokumentType struct {
 
 // PrateciDokument ...
 type PrateciDokument struct {
-	JirPD     []string `xml:"tns:JirPD"`
-	ZastKodPD []string `xml:"tns:ZastKodPD"`
+	JirPD     string `xml:"tns:JirPD"`
+	ZastKodPD string `xml:"tns:ZastKodPD"`
 }
 
 // NapojnicaType ...
@@ -242,4 +257,24 @@ type BrojPDType struct {
 	BrOznPD  int    `xml:"tns:BrOznPD"`
 	OznPosPr string `xml:"tns:OznPosPr"`
 	OznNapUr int    `xml:"tns:OznNapUr"`
+}
+
+// generateUniqueID generates a unique ID
+func generateUniqueID() string {
+	return fmt.Sprintf("%x", time.Now().UnixNano())
+}
+
+// newFiskalHeader creates a new instance of ZaglavljeType with a unique message ID and the current timestamp
+//
+// This function generates a new UUIDv4 for the IdPoruke field to ensure that each message has a unique identifier.
+// It also sets the DatumVrijeme field to the current time formatted as "2006-01-02T15:04:05" to indicate when the message was created.
+//
+// Returns:
+//
+//	*ZaglavljeType: A pointer to a new ZaglavljeType instance with the IdPoruke and DatumVrijeme fields populated.
+func newFiskalHeader() *ZaglavljeType {
+	return &ZaglavljeType{
+		IdPoruke:     uuid.New().String(),
+		DatumVrijeme: time.Now().Format("02.01.2006T15:04:05"),
+	}
 }
