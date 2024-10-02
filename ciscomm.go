@@ -49,7 +49,6 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, 
 	if fe.ciscert == nil || fe.ciscert.SSLverifyPoll == nil {
 		return nil, 0, errors.New("CIScert or SSLverifyPoll is not initialized")
 	}
-
 	// Create a custom TLS configuration using TLS 1.3 and the CA pool
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS13,

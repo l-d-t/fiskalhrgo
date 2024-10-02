@@ -17,6 +17,7 @@ import (
 )
 
 var testEntity *FiskalEntity
+var testOIB, certPath, certPassword string
 
 // TestMain is run before any other tests. It sets up the shared instances and read env variables.
 func TestMain(m *testing.M) {
@@ -33,8 +34,8 @@ ___________.__        __           .__    ___ _____________    ________
 	fmt.Println("Setting up...")
 
 	certBase64 := os.Getenv("CIS_P12_BASE64")
-	certPassword := os.Getenv("FISKALHRGO_TEST_CERT_PASSWORD")
-	testOIB := os.Getenv("FISKALHRGO_TEST_CERT_OIB")
+	certPassword = os.Getenv("FISKALHRGO_TEST_CERT_PASSWORD")
+	testOIB = os.Getenv("FISKALHRGO_TEST_CERT_OIB")
 
 	if certBase64 == "" || certPassword == "" || testOIB == "" {
 		fmt.Println("CIS_P12_BASE64 or FISKALHRGO_TEST_CERT_PASSWORD or FISKALHRGO_TEST_CERT_OIB environment variables are not set")
@@ -74,7 +75,7 @@ ___________.__        __           .__    ___ _____________    ________
 
 	// Create a temporary file to store the certificate
 	tempDir := os.TempDir()
-	certPath := filepath.Join(tempDir, "fiskal.p12")
+	certPath = filepath.Join(tempDir, "fiskal.p12")
 	err = os.WriteFile(certPath, certData, 0644)
 	if err != nil {
 		fmt.Printf("Failed to write certificate to temp file: %v\n", err)
@@ -207,6 +208,28 @@ func TestPing(t *testing.T) {
 		t.Fatalf("Failed to make Ping request: %v", err)
 	}
 	t.Log("Ping OK!")
+}
+
+// Test CIS production ping
+// This test just the SSL connection and production cert verification pool and ping message to the CIS production server
+// The rest should be identical to the demo environment and the rest can only be tested in the demo environment ofc.
+func TestProductionPing(t *testing.T) {
+	if os.Getenv("CIStestprodping") == "" {
+		t.Skip("Skipping TestProductionPing because CIStestprodping environment variable is not set")
+	}
+	t.Log("Testing Production Ping...")
+	// The path is still to the demo cert, but is not important since we will test only the SSL connection and Echo message
+	// that is not signed by the user certificate
+	prodEntity, err := NewFiskalEntity(testEntity.oib, false, "TEST3", true, false, false, certPath, certPassword)
+	if err != nil {
+		t.Fatalf("Failed to create production FiskalEntity: %v", err)
+	}
+
+	err = prodEntity.PingCIS()
+	if err != nil {
+		t.Fatalf("Failed to make Production Ping request: %v", err)
+	}
+	t.Log("Production Ping OK!")
 }
 
 // Test CIS invoice with helper functions

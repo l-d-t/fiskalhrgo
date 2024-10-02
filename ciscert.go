@@ -39,7 +39,7 @@ type signatureCheckCIScert struct {
 // parseAndVerifyEmbeddedCerts parses the embedded certificates, verifies the chain, and returns the public key of the newest valid certificate
 func parseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*signatureCheckCIScert, error) {
 	var newestCert *x509.Certificate
-	var roots *x509.CertPool
+	var sslpool *x509.CertPool
 
 	// Read the embedded certificate files
 	certFiles, err := certFS.ReadDir(dir)
@@ -81,16 +81,19 @@ func parseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 			certData = rest
 		}
 
+		sslpool = x509.NewCertPool()
 		// Verify the certificate chain
-		roots = x509.NewCertPool()
+		roots := x509.NewCertPool()
 		intermediates := x509.NewCertPool()
 
 		// Add the root certificate to the roots pool
 		roots.AddCert(certs[len(certs)-1])
+		sslpool.AddCert(certs[len(certs)-1])
 
 		// Add intermediate certificates to the intermediates pool
 		for i := 1; i < len(certs)-1; i++ {
 			intermediates.AddCert(certs[i])
+			sslpool.AddCert(certs[i])
 		}
 
 		opts := x509.VerifyOptions{
@@ -128,7 +131,7 @@ func parseAndVerifyEmbeddedCerts(certFS embed.FS, dir string, pattern string) (*
 		Issuer:        newestCert.Issuer.String(),
 		ValidFrom:     newestCert.NotBefore,
 		ValidUntil:    newestCert.NotAfter,
-		SSLverifyPoll: roots,
+		SSLverifyPoll: sslpool,
 	}, nil
 }
 
