@@ -140,13 +140,15 @@ func TestGenerateZKI(t *testing.T) {
 // GitHub repository and CI environment, where the correct test certificate is available.
 
 func TestKnownZKI(t *testing.T) {
+	if os.Getenv("FISKALHRGO_TEST_KNOWN_ZKI") == "" {
+		t.Skip("Skipping TestKnownZKI because FISKALHRGO_TEST_KNOWN_ZKI environment variable is not set")
+	}
 	t.Logf("Testing Known LDT ZKI generation...")
 
-	expectedZKI := "0b173c6127809d4f0fff53e13222c819" // This is the ZKI for the test certificate
+	expectedZKI := os.Getenv("FISKALHRGO_TEST_KNOWN_ZKI") // This is the ZKI for the test certificate
 
-	// Check if the external contributor has set their own known ZKI via environment variable
-	if envZKI := os.Getenv("FISKALHRGO_TEST_KNOWN_ZKI"); envZKI != "" {
-		expectedZKI = envZKI
+	if !ValidateZKI(expectedZKI) {
+		t.Fatalf("Invalid ZKI provided in FISKALHRGO_TEST_KNOWN_ZKI environment variable")
 	}
 
 	timeString := "17.05.2024 16:00:38"
@@ -172,9 +174,8 @@ func TestKnownZKI(t *testing.T) {
 	if zki != expectedZKI {
 		t.Error("Note:")
 		t.Error("- The ZKI (Protection Code) is dependent on the private key used.")
-		t.Error("- If you're an external contributor and don't have the correct test certificate, this test is expected to fail.")
-		t.Error("- You can use the FISKALHRGO_TEST_KNOWN_ZKI environment variable to specify your own expected ZKI for testing.")
-		t.Error("- This test should pass on the official GitHub and CI setup where the correct certificate is available.")
+		t.Error("- Use the FISKALHRGO_TEST_KNOWN_ZKI environment variable to specify your expected ZKI for testing.")
+		t.Error("- This test should pass on the official GitHub and CI setup where the correct certificate and ZKI pair is available.")
 		t.Fatalf("ERROR - Expected ZKI: %s, got %s", expectedZKI, zki)
 	} else {
 		t.Log("ZKI matched the expected value.")
@@ -214,8 +215,8 @@ func TestPing(t *testing.T) {
 // This test just the SSL connection and production cert verification pool and ping message to the CIS production server
 // The rest should be identical to the demo environment and the rest can only be tested in the demo environment ofc.
 func TestProductionPing(t *testing.T) {
-	if os.Getenv("CIStestprodping") == "" {
-		t.Skip("Skipping TestProductionPing because CIStestprodping environment variable is not set")
+	if os.Getenv("CISTESTPRODPING") == "" {
+		t.Skip("Skipping TestProductionPing because CISTESTPRODPING environment variable is not set")
 	}
 	t.Log("Testing Production Ping...")
 	// The path is still to the demo cert, but is not important since we will test only the SSL connection and Echo message
