@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    - cron: "0 0 1 * *"  # Runs at 00:00 on the 1st day of every month
 
 jobs:
   build:
@@ -22,6 +24,8 @@ jobs:
       CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
       FISKALHRGO_TEST_CERT_PASSWORD: ${{ secrets.FISKALHRGO_TEST_CERT_PASSWORD }}
       FISKALHRGO_TEST_CERT_OIB: ${{ secrets.FISKALHRGO_TEST_CERT_OIB }}
+      FISKALHRGO_TEST_KNOWN_ZKI: ${{ secrets.FISKALHRGO_TEST_KNOWN_ZKI }}
+      CISTESTPRODPING: ${{ secrets.CISTESTPRODPING }}
     steps:
     - uses: actions/checkout@v4
 
@@ -42,6 +46,8 @@ jobs:
       CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
       FISKALHRGO_TEST_CERT_PASSWORD: ${{ secrets.FISKALHRGO_TEST_CERT_PASSWORD }}
       FISKALHRGO_TEST_CERT_OIB: ${{ secrets.FISKALHRGO_TEST_CERT_OIB }}
+      FISKALHRGO_TEST_KNOWN_ZKI: ${{ secrets.FISKALHRGO_TEST_KNOWN_ZKI }}
+      CISTESTPRODPING: ${{ secrets.CISTESTPRODPING }}
     steps:
     - uses: actions/checkout@v4
 
