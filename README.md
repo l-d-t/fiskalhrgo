@@ -37,6 +37,7 @@ While there are numerous open-source implementations of Croatian fiscalization l
 - Suitable for any type of application (web service, web app, desktop)
 - Extract and return certificate details such as public key, issuer, subject, serial number, and validity period.
 - Helper function to get data for QR code (that can be passed to a QR code generator of your choice)
+- Optional libxml2 based validation of CIS responses when built with the `libxml2` tag on Linux
 
 ## Go Version Compatibility
 - Minimum tested and supported version: **Go 1.22**

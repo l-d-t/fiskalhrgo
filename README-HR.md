@@ -38,6 +38,7 @@ Iako postoji mnogo open-source implementacija libraryja za fiskalizaciju, one su
 - Prikladno za bilo koju vrstu aplikacije (web servis, web aplikacija, desktop aplikacija).
 - Ekstrakcija i vraćanje detalja certifikata kao što su javni ključ, izdavatelj, subjekt, serijski broj i razdoblje valjanosti.
 - Pomoćne funkcije za generiranje QR koda za ispis na računima u raznim formatima.
+- Opcionalna provjera CIS odgovora uz libxml2 kada se kompilira s oznakom `libxml2` na Linuxu.
 
 ### Go Verzija Kompatibilnost
 - Minimalna testirana i podržana verzija: **Go 1.22**
