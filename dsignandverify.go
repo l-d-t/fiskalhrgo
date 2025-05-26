@@ -183,5 +183,8 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 // This limitation will remain unresolved until a suitable library is found or a custom implementation is built,
 // or until fixes are contributed and merged into existing libraries.
 func (fe *FiskalEntity) verifyXML(xmlData []byte) (bool, error) {
+	if fe.useLibxml2 {
+		return fe.verifyXMLLibxml(xmlData)
+	}
 	return true, nil
 }
