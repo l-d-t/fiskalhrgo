@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -23,12 +24,12 @@ var testOIB, certPath, certPassword string
 func TestMain(m *testing.M) {
 
 	fmt.Println(`
-___________.__        __           .__    ___ _____________    ________        
-\_   _____/|__| _____|  | _______  |  |  /   |   \______   \  /  _____/  ____  
- |    __)  |  |/  ___/  |/ /\__  \ |  | /    ~    \       _/ /   \  ___ /  _ \ 
+___________.__        __           .__    ___ _____________    ________
+\_   _____/|__| _____|  | _______  |  |  /   |   \______   \  /  _____/  ____
+ |    __)  |  |/  ___/  |/ /\__  \ |  | /    ~    \       _/ /   \  ___ /  _ \
  |     \   |  |\___ \|    <  / __ \|  |_\    Y    /    |   \ \    \_\  (  <_> )
- \___  /   |__/____  >__|_ \(____  /____/\___|_  /|____|_  /  \______  /\____/ 
-     \/            \/     \/     \/            \/        \/          \/        
+ \___  /   |__/____  >__|_ \(____  /____/\___|_  /|____|_  /  \______  /\____/
+     \/            \/     \/     \/            \/        \/          \/
 	`)
 
 	fmt.Println("Setting up...")
@@ -40,26 +41,26 @@ ___________.__        __           .__    ___ _____________    ________
 	if certBase64 == "" || certPassword == "" || testOIB == "" {
 		fmt.Println("CIS_P12_BASE64 or FISKALHRGO_TEST_CERT_PASSWORD or FISKALHRGO_TEST_CERT_OIB environment variables are not set")
 		fmt.Println(`
-		The CIS_P12_BASE64 environment variable must contain a single-line base64 
-		encoded string of the original valid Fiskal certificate in P12 format. This 
-		encoded string is essential for the tests to  interact with the CIS 
+		The CIS_P12_BASE64 environment variable must contain a single-line base64
+		encoded string of the original valid Fiskal certificate in P12 format. This
+		encoded string is essential for the tests to  interact with the CIS
 		(Croatian Fiscalization System).
-		
-		To encode your P12 certificate file (e.g., fiskalDemo1.p12) to a single-line 
+
+		To encode your P12 certificate file (e.g., fiskalDemo1.p12) to a single-line
 		base64 string on a Linux system, use the following command:
-		
+
 			base64 -w 0 fiskal1.p12
-		
+
 		Then, set the CIS_P12_BASE64 environment variable with the encoded string.
-		
-		Additionally, ensure that the FISKALHRGO_TEST_CERT_PASSWORD and 
-		FISKALHRGO_TEST_CERT_OIB environment variables are set with the appropriate 
+
+		Additionally, ensure that the FISKALHRGO_TEST_CERT_PASSWORD and
+		FISKALHRGO_TEST_CERT_OIB environment variables are set with the appropriate
 		certificate password and OIB (Personal Identification Number) respectively.
-		
-		This system is used for the tests because these tests will run in CI 
-		(Continuous Integration), so secrets, for example on GitHub, are passed as 
-		environment variables. This makes it easy and convenient to manage. The 
-		certificate, password, and OIB for tests can be easily stored as GitHub 
+
+		This system is used for the tests because these tests will run in CI
+		(Continuous Integration), so secrets, for example on GitHub, are passed as
+		environment variables. This makes it easy and convenient to manage. The
+		certificate, password, and OIB for tests can be easily stored as GitHub
 		Action secrets, for example.`)
 		os.Exit(1)
 	}
@@ -401,4 +402,52 @@ func TestSimpleInvoiceFromReadme(t *testing.T) {
 
 	t.Logf("We got a JIR!: %v, ZKI: %v", jir, zkiR)
 
+}
+
+// TestSimpleInvoiceFromReadmeVerifyLibXml2 exercises a simple invoice
+// request with libxml2 based signature validation enabled.
+func TestSimpleInvoiceFromReadmeVerifyLibXml2(t *testing.T) {
+	// Check if we're running on Linux
+	if runtime.GOOS != "linux" {
+		t.Skip("Skipping test: requires Linux operating system")
+		return
+	}
+	testEntity.SetUseLibxml2(true)
+	defer testEntity.SetUseLibxml2(false)
+
+	testXML := []byte(`<?xml version="1.0"?><root><test>data</test></root>`)
+
+	_, err := testEntity.verifyXMLLibxml(testXML)
+	if err != nil && err.Error() == "libxml2 validation not supported" {
+		t.Skip("Skipping test: libxml2 support not compiled in (use -tags libxml2)")
+		return
+	}
+
+	// If we get here, we're on Linux and libxml2 is available
+	t.Log("Running libxml2-specific test on Linux")
+
+	invoice, _, err := testEntity.NewCISInvoice(
+		time.Now(),
+		uint(1236),
+		uint(1),
+		[][]interface{}{{"25.00", "1000.00", "250.00"}},
+		nil,
+		nil,
+		"0.00",
+		"0.00",
+		"0.00",
+		nil,
+		"1250.00",
+		CISCash,
+		"12345678901",
+	)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	jir, zkiR, err := invoice.InvoiceRequest()
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	t.Logf("We got a JIR!: %v, ZKI: %v", jir, zkiR)
 }
