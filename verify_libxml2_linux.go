@@ -7,34 +7,33 @@ package fiskalhrgo
 #include <libxml/parser.h>
 #include <libxml/c14n.h>
 #include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 #include <stdlib.h>
 
 int canonicalize_signed_info(char* xml, int xmlLen, char **out) {
     xmlDocPtr doc = xmlReadMemory(xml, xmlLen, NULL, NULL, 0);
     if (doc == NULL) return -1;
 
-    xmlXPathContextPtr ctx = xmlXPathNewContext(doc);
-    if (ctx == NULL) { xmlFreeDoc(doc); return -2; }
-    xmlXPathRegisterNs(ctx, BAD_CAST "ds", BAD_CAST "http://www.w3.org/2000/09/xmldsig#");
-    xmlXPathObjectPtr obj = xmlXPathEvalExpression(BAD_CAST "//ds:SignedInfo", ctx);
-    if (obj == NULL || xmlXPathNodeSetIsEmpty(obj->nodesetval)) {
-        if (obj) xmlXPathFreeObject(obj);
-        xmlXPathFreeContext(ctx);
+    xmlNodePtr root = xmlDocGetRootElement(doc);
+    if (root == NULL) {
+        xmlFreeDoc(doc);
+        return -2;
+    }
+
+    xmlNodeSetPtr nodeset = xmlXPathNodeSetCreate(root);
+    if (nodeset == NULL) {
         xmlFreeDoc(doc);
         return -3;
     }
-    xmlNodeSetPtr set = xmlXPathNodeSetCreate(obj->nodesetval->nodeTab[0]);
-    xmlXPathFreeObject(obj);
-    xmlXPathFreeContext(ctx);
-    int ret = xmlC14NDocDumpMemory(doc, set, XML_C14N_1_0, NULL, 0, (xmlChar**)out);
-    xmlXPathFreeNodeSet(set);
+
+    int ret = xmlC14NDocDumpMemory(doc, nodeset, XML_C14N_1_0, NULL, 0, (xmlChar**)out);
+
+    xmlXPathFreeNodeSet(nodeset);
     xmlFreeDoc(doc);
     return ret;
 }
 
-void freeCanon(char* p) {
-    xmlFree(p);
-}
+void freeCanon(char* p) { xmlFree(p); }
 */
 import "C"
 
@@ -47,7 +46,7 @@ import (
 	"unsafe"
 )
 
-func canonicalizeWithLibxml2(data []byte) ([]byte, error) {
+func canonicalizeSignedInfo(data []byte) ([]byte, error) {
 	if len(data) == 0 {
 		return nil, errors.New("no data")
 	}
@@ -62,11 +61,11 @@ func canonicalizeWithLibxml2(data []byte) ([]byte, error) {
 }
 
 func (fe *FiskalEntity) verifyXMLLibxml(xmlData []byte) (bool, error) {
-	sigValue, err := extractSignatureValue(xmlData)
+	signedInfo, sigValue, err := extractSignatureParts(xmlData)
 	if err != nil {
 		return false, err
 	}
-	canonical, err := canonicalizeWithLibxml2(xmlData)
+	canonical, err := canonicalizeSignedInfo(signedInfo)
 	if err != nil {
 		return false, err
 	}
