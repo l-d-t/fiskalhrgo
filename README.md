@@ -215,3 +215,4 @@ Then, set the `CIS_P12_BASE64` environment variable with the encoded string.
 Additionally, ensure that the `FISKALHRGO_TEST_CERT_PASSWORD` and `FISKALHRGO_TEST_CERT_OIB` environment variables are set with the appropriate certificate password and OIB (Personal Identification Number) respectively.
 
 This system is used for the tests because these tests will run in CI (Continuous Integration), so secrets, for example on GitHub, are passed as environment variables. This makes it easy and convenient to manage. The certificate, password, and OIB for tests can be easily stored as GitHub Action secrets, for example.
+a
