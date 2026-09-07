@@ -6,7 +6,7 @@ require (
 	github.com/beevik/etree v1.5.1
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/crypto v0.41.0
+	golang.org/x/crypto v0.56.0
 )
 
 require (
