@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -106,9 +107,12 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, 
 
 	if sign {
 		// Verify the signature
-		_, err := fe.verifyXML(body)
+		verified, err := fe.verifyXML(body)
 		if err != nil {
 			return body, resp.StatusCode, fmt.Errorf("failed to verify CIS signature: %w", err)
+		}
+		if !verified {
+			return body, resp.StatusCode, errors.New("CIS XML signature is invalid")
 		}
 	}
 
@@ -123,6 +127,33 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, 
 	if resp.StatusCode == http.StatusOK {
 		return soapResp.Body.Content, resp.StatusCode, nil
 	} else {
-		return soapResp.Body.Content, resp.StatusCode, fmt.Errorf("CIS returned an error: %v", resp.Status)
+		return soapResp.Body.Content, resp.StatusCode, cisResponseError(resp.Status, soapResp.Body.Content)
 	}
+}
+
+// cisResponseError preserves structured CIS errors instead of hiding them behind
+// the HTTP status. Callers must still verify signed responses before using it.
+func cisResponseError(status string, body []byte) error {
+	var response struct {
+		Greske      *GreskeType `xml:"Greske"`
+		FaultCode   string      `xml:"faultcode"`
+		FaultString string      `xml:"faultstring"`
+	}
+	var messages []string
+	if err := xml.Unmarshal(body, &response); err == nil {
+		if response.Greske != nil {
+			for _, greska := range response.Greske.Greska {
+				if greska != nil {
+					messages = append(messages, fmt.Sprintf("%s: %s", greska.SifraGreske, greska.PorukaGreske))
+				}
+			}
+		}
+		if response.FaultString != "" {
+			messages = append(messages, fmt.Sprintf("%s: %s", response.FaultCode, response.FaultString))
+		}
+	}
+	if len(messages) > 0 {
+		return fmt.Errorf("CIS returned an error: %s: %s", status, strings.Join(messages, "; "))
+	}
+	return fmt.Errorf("CIS returned an error: %s", status)
 }

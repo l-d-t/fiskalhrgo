@@ -87,6 +87,13 @@ ___________.__        __           .__    ___ _____________    ________
 		fmt.Printf("Failed to create FiskalEntity: %v\n", err)
 		os.Exit(1)
 	}
+	// Tagged Linux CI must verify actual CIS DEMO responses, not use the
+	// intentional portable verification bypass. No new secrets are required.
+	if err := testEntity.SetUseLibxml2(Libxml2Available()); err != nil {
+		fmt.Printf("Failed to configure XML backend: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Native XML verification enabled: %v\n", testEntity.UseLibxml2())
 
 	fmt.Println("Running tests...")
 	// Run tests
@@ -255,7 +262,7 @@ func TestNewCISInvoice(t *testing.T) {
 	brOznRac := uint(rand.Intn(6901) + 100)
 	oznNapUr := uint(1)
 	iznosUkupno := "1330.50"
-	oibOper := "12345678901"
+	oibOper := testOIB // Use a valid operator OIB for live DEMO validation.
 
 	invoice, zki, err := testEntity.NewCISInvoice(
 		dateTime,
@@ -385,7 +392,7 @@ func TestSimpleInvoiceFromReadme(t *testing.T) {
 		"1250.00", // total
 		CISCash,   // payment method G - cash, K - credit card, T -
 		// transfer, O - other, C - check (deprecated)
-		"12345678901", // operator OIB
+		testOIB, // valid operator OIB for live DEMO validation
 	)
 
 	if err != nil {
@@ -401,4 +408,30 @@ func TestSimpleInvoiceFromReadme(t *testing.T) {
 
 	t.Logf("We got a JIR!: %v, ZKI: %v", jir, zkiR)
 
+}
+
+// TestCISB2BInvoice exercises the current CIS 1.0 buyer-OIB field against
+// DEMO using the same credentials as the existing invoice integration tests.
+func TestCISB2BInvoice(t *testing.T) {
+	for _, payment := range []PaymentMethod{CISCash, CISCard} {
+		t.Run(string(payment), func(t *testing.T) {
+			invoice, zki, err := testEntity.NewCISInvoice(time.Now(), uint(rand.Intn(6901)+100), 1,
+				[][]interface{}{{"25.00", "8.00", "2.00"}}, nil, nil,
+				"0.00", "0.00", "0.00", nil, "10.00", payment, testOIB)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// Checksum-valid test buyer; this request is only sent to DEMO.
+			if err := invoice.SetOibPrimateljaRacuna("65049901548"); err != nil {
+				t.Fatal(err)
+			}
+			jir, returnedZKI, err := invoice.InvoiceRequest()
+			if err != nil {
+				t.Fatalf("DEMO B2B invoice failed (native=%v): %v", testEntity.UseLibxml2(), err)
+			}
+			if !ValidateJIR(jir) || returnedZKI != zki {
+				t.Fatalf("invalid B2B result: JIR=%s ZKI=%s", jir, returnedZKI)
+			}
+		})
+	}
 }

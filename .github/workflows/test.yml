@@ -41,7 +41,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 'stable'
+          go-version-file: go.mod
 
       - name: Build
         run: go build -v ./...
@@ -49,32 +49,15 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-  go122:
-    runs-on: ubuntu-latest
-    env:
-      CIS_P12_BASE64: ${{ secrets.CIS_P12_BASE64 }}
-      FISKALHRGO_TEST_CERT_PASSWORD: ${{ secrets.FISKALHRGO_TEST_CERT_PASSWORD }}
-      FISKALHRGO_TEST_CERT_OIB: ${{ secrets.FISKALHRGO_TEST_CERT_OIB }}
-      FISKALHRGO_TEST_KNOWN_ZKI: ${{ secrets.FISKALHRGO_TEST_KNOWN_ZKI }}
-      CISTESTPRODPING: ${{ secrets.CISTESTPRODPING }}
-    steps:
-      - name: Checkout PR branch
-        if: ${{ github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      # Keep portable coverage on every OS. Run the real CIS DEMO integration
+      # suite with native verification as well on one Linux matrix entry.
+      - name: Install native XML test dependencies
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libxml2-dev xmlsec1
 
-      - name: Checkout default (non-PR)
-        if: ${{ github.event_name != 'pull_request_target' }}
-        uses: actions/checkout@v4
+      - name: Test native XML signatures and CIS DEMO
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
+        env:
+          CGO_ENABLED: '1'
+        run: go test -tags libxml2 -race -count=1 -v ./...
 
-      - name: Set up Go 1.22
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.22'
-
-      - name: Build
-        run: go build -v ./...
-
-      - name: Test
-        run: go test -v ./...

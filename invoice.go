@@ -202,6 +202,34 @@ func (invoice *RacunType) GetOib() string {
 	return invoice.Oib
 }
 
+// SetOibPrimateljaRacuna sets the buyer OIB for CIS Fiskalizacija 1.0 B2B
+// invoices. An empty value clears it (ordinary consumer invoices omit it).
+// Bank-transfer payments (T) cannot carry buyer OIB in this protocol.
+// Buyer OIB is not an input to ZKI; changing it does not regenerate ZKI.
+func (invoice *RacunType) SetOibPrimateljaRacuna(oib string) error {
+	if invoice == nil {
+		return errors.New("invoice is nil")
+	}
+	if err := validateBuyerOIB(oib, invoice.NacinPlac); err != nil {
+		return err
+	}
+	invoice.OibPrimateljaRacuna = oib
+	return nil
+}
+
+func validateBuyerOIB(oib, payment string) error {
+	if oib == "" {
+		return nil
+	}
+	if !ValidateOIB(oib) {
+		return errors.New("invalid OibPrimateljaRacuna: expected an 11-digit OIB with valid checksum")
+	}
+	if payment != string(CISCash) && payment != string(CISCard) && payment != string(CISMixOther) {
+		return errors.New("OibPrimateljaRacuna requires payment G, K or O; T is not allowed")
+	}
+	return nil
+}
+
 // Set late delivery to true, and set the ZKI you pass from saved data when you issued the invoice to customer
 // Don't worry the ZKI you set will be validated with the current certificate before sending unless to set
 // IhaveZKIwithExpiredCertificateEdgeCase method then the old certificate provided will be used to validate the ZKI
@@ -316,6 +344,10 @@ func (invoice *RacunType) InvoiceRequest() (string, string, error) {
 	//some basic tests for invoice
 	if invoice == nil {
 		return "", "", errors.New("invoice is nil")
+	}
+	// Recheck exported fields in case they were changed after using the setter.
+	if err := validateBuyerOIB(invoice.OibPrimateljaRacuna, invoice.NacinPlac); err != nil {
+		return "", invoice.ZastKod, err
 	}
 
 	if invoice.SpecNamj != "" {

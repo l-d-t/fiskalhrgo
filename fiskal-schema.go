@@ -157,6 +157,7 @@ type RacunType struct {
 	NakDost               bool                  `xml:"tns:NakDost"`
 	ParagonBrRac          string                `xml:"tns:ParagonBrRac,omitempty"`
 	SpecNamj              string                `xml:"tns:SpecNamj,omitempty"`
+	OibPrimateljaRacuna   string                `xml:"tns:OibPrimateljaRacuna,omitempty"`
 	PrateciDokument       *PrateciDokument      `xml:"tns:PrateciDokument,omitempty"`
 	PromijenjeniNacinPlac string                `xml:"tns:PromijenjeniNacinPlac,omitempty"`
 	Napojnica             *NapojnicaType        `xml:"tns:Napojnica,omitempty"`
