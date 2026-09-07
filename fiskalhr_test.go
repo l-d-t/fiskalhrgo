@@ -262,7 +262,7 @@ func TestNewCISInvoice(t *testing.T) {
 	brOznRac := uint(rand.Intn(6901) + 100)
 	oznNapUr := uint(1)
 	iznosUkupno := "1330.50"
-	oibOper := "12345678901"
+	oibOper := testOIB // Use a valid operator OIB for live DEMO validation.
 
 	invoice, zki, err := testEntity.NewCISInvoice(
 		dateTime,
@@ -392,7 +392,7 @@ func TestSimpleInvoiceFromReadme(t *testing.T) {
 		"1250.00", // total
 		CISCash,   // payment method G - cash, K - credit card, T -
 		// transfer, O - other, C - check (deprecated)
-		"12345678901", // operator OIB
+		testOIB, // valid operator OIB for live DEMO validation
 	)
 
 	if err != nil {
