@@ -55,8 +55,15 @@ static int add_subtree(xmlNodeSetPtr set, xmlNodePtr node, xmlNodePtr excluded) 
 		for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
 			if (xmlXPathNodeSetAddUnique(set, (xmlNodePtr)attr) < 0) return -1;
 		}
-		for (xmlNsPtr ns = node->nsDef; ns != NULL; ns = ns->next) {
-			if (xmlXPathNodeSetAddNs(set, node, ns) < 0) return -1;
+		xmlNsPtr *namespaces = xmlGetNsList(node->doc, node);
+		if (namespaces != NULL) {
+			for (int i = 0; namespaces[i] != NULL; i++) {
+				if (xmlXPathNodeSetAddNs(set, node, namespaces[i]) < 0) {
+					xmlFree(namespaces);
+					return -1;
+				}
+			}
+			xmlFree(namespaces);
 		}
 	}
 	for (xmlNodePtr child = node->children; child != NULL; child = child->next) {

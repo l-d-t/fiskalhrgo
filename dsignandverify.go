@@ -11,8 +11,10 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/beevik/etree"
@@ -184,19 +186,9 @@ func (fe *FiskalEntity) SignXML(xmlData []byte) ([]byte, error) {
 	return fe.signXML(xmlData)
 }
 
-// verifyXML is currently a placeholder function for verifying signed XML documents.
-// It always returns true without performing any actual verification and should not be used in production environments
-// until proper XML signature verification is fully implemented.
-//
-// The primary challenge is the absence of a reliable pure Go implementation for the Canonicalization Method
-// (http://www.w3.org/TR/2001/REC-xml-c14n-20010315). Several libraries were evaluated, but all encountered subtle
-// issues during implementation. Without a robust xml canonicalization solution, xml signature verification is not possible.
-//
-// While the library supports Exclusive Canonicalization (http://www.w3.org/2001/10/xml-exc-c14n#), which suffices
-// for signing requests, the Croatian CIS system's responses use non-exclusive canonicalization, preventing verification at this time.
-//
-// This limitation will remain unresolved until a suitable library is found or a custom implementation is built,
-// or until fixes are contributed and merged into existing libraries.
+// verifyXML preserves the intentional legacy bypass when native mode is off.
+// In that mode true means verification was skipped, NOT a valid XML signature.
+// Native mode checks the signed payload, reference digest and pinned certificate.
 func (fe *FiskalEntity) verifyXML(xmlData []byte) (bool, error) {
 	if !fe.useLibxml2 {
 		return true, nil
@@ -205,7 +197,8 @@ func (fe *FiskalEntity) verifyXML(xmlData []byte) (bool, error) {
 }
 
 // VerifyXML verifies an XML signature and pins its certificate to the CIS
-// certificate embedded in this FiskalEntity. Native support must be enabled.
+// certificate embedded in this FiskalEntity. The signature must cover the root
+// or the sole CIS response in a SOAP Body. Native support must be enabled.
 func (fe *FiskalEntity) VerifyXML(xmlData []byte) (bool, error) {
 	if !fe.useLibxml2 {
 		return false, errors.New("XML signature verification requires libxml2; call SetUseLibxml2(true)")
@@ -224,6 +217,9 @@ const (
 )
 
 func (fe *FiskalEntity) verifyXMLLibxml2(xmlData []byte) (bool, error) {
+	if err := validateSignedXMLDocument(xmlData); err != nil {
+		return false, err
+	}
 	doc := etree.NewDocument()
 	if err := doc.ReadFromBytes(xmlData); err != nil {
 		return false, fmt.Errorf("failed to parse signed XML: %w", err)
@@ -253,6 +249,12 @@ func (fe *FiskalEntity) verifyXMLLibxml2(xmlData []byte) (bool, error) {
 	referenceURI := reference.SelectAttrValue("URI", "")
 	if !strings.HasPrefix(referenceURI, "#") || len(referenceURI) == 1 {
 		return false, errors.New("XML signature Reference URI must identify a local Id")
+	}
+	if err := validateSignatureTarget(doc.Root(), signature, referenceURI); err != nil {
+		return false, err
+	}
+	if len(canonicalizationMethod.ChildElements()) != 0 {
+		return false, errors.New("canonicalization parameters are not supported")
 	}
 	referenceExclusive, err := referenceCanonicalizationMode(reference)
 	if err != nil {
@@ -371,31 +373,113 @@ func referenceCanonicalizationMode(reference *etree.Element) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	seenEnveloped := false
-	seenCanonicalization := false
-	exclusive := false
-	for _, transform := range transforms.ChildElements() {
+	children := transforms.ChildElements()
+	if len(children) != 2 {
+		return false, errors.New("expected enveloped-signature followed by canonicalization")
+	}
+	for _, transform := range children {
 		if transform.Tag != "Transform" || transform.NamespaceURI() != xmlDSigNamespace {
-			continue
+			return false, errors.New("unexpected transform element")
 		}
-		switch algorithm := transform.SelectAttrValue("Algorithm", ""); algorithm {
-		case "http://www.w3.org/2000/09/xmldsig#enveloped-signature":
-			seenEnveloped = true
-		case c14n10Algorithm, exclusiveC14NAlgorithm:
-			var err error
-			exclusive, err = canonicalizationMode(algorithm)
-			if err != nil {
-				return false, err
+		if len(transform.ChildElements()) != 0 {
+			return false, errors.New("transform parameters are not supported")
+		}
+	}
+	if children[0].SelectAttrValue("Algorithm", "") != xmlDSigNamespace+"enveloped-signature" {
+		return false, errors.New("first transform must be enveloped-signature")
+	}
+	return canonicalizationMode(children[1].SelectAttrValue("Algorithm", ""))
+}
+
+// Reject constructs which could be interpreted differently by the Go and C
+// parsers. External resources and DTD-defined entities are never needed by CIS.
+func validateSignedXMLDocument(data []byte) error {
+	decoder := xml.NewDecoder(strings.NewReader(string(data)))
+	depth, roots := 0, 0
+	for {
+		token, err := decoder.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("invalid signed XML: %w", err)
+		}
+		switch token := token.(type) {
+		case xml.Directive:
+			return errors.New("DTD and XML directives are not permitted")
+		case xml.StartElement:
+			if depth == 0 {
+				roots++
 			}
-			seenCanonicalization = true
-		default:
-			return false, fmt.Errorf("unsupported XML signature transform %q", algorithm)
+			depth++
+			attrs := make(map[xml.Name]bool)
+			for _, attr := range token.Attr {
+				if attrs[attr.Name] {
+					return errors.New("duplicate XML attribute")
+				}
+				attrs[attr.Name] = true
+				if attr.Name.Local == "Id" && attr.Name.Space != "" {
+					return errors.New("signature Id must be unqualified")
+				}
+			}
+		case xml.EndElement:
+			depth--
+		case xml.CharData:
+			if depth == 0 && strings.TrimSpace(string(token)) != "" {
+				return errors.New("text outside XML root")
+			}
 		}
 	}
-	if !seenEnveloped || !seenCanonicalization {
-		return false, errors.New("XML signature must use enveloped-signature and canonicalization transforms")
+	if roots != 1 {
+		return errors.New("expected exactly one XML root")
 	}
-	return exclusive, nil
+	return nil
+}
+
+const soapNamespace = "http://schemas.xmlsoap.org/soap/envelope/"
+
+func validateSignatureTarget(root, signature *etree.Element, referenceURI string) error {
+	target := root
+	if root.Tag == "Envelope" || root.NamespaceURI() == soapNamespace {
+		if root.Tag != "Envelope" || root.NamespaceURI() != soapNamespace {
+			return errors.New("invalid SOAP Envelope namespace")
+		}
+		var body *etree.Element
+		headers := 0
+		for _, child := range root.ChildElements() {
+			if child.NamespaceURI() != soapNamespace {
+				return errors.New("unexpected SOAP Envelope child namespace")
+			}
+			switch child.Tag {
+			case "Body":
+				if body != nil {
+					return errors.New("multiple SOAP Body elements")
+				}
+				body = child
+			case "Header":
+				headers++
+				if headers > 1 || body != nil {
+					return errors.New("invalid SOAP Header placement")
+				}
+			default:
+				return errors.New("unexpected SOAP Envelope child")
+			}
+		}
+		if body == nil || len(body.ChildElements()) != 1 || strings.TrimSpace(body.Text()) != "" {
+			return errors.New("expected one CIS response in SOAP Body")
+		}
+		target = body.ChildElements()[0]
+		if target.NamespaceURI() != DefaultNamespace || !strings.HasSuffix(target.Tag, "Odgovor") {
+			return errors.New("SOAP Body does not contain a CIS response")
+		}
+	}
+	if target.SelectAttrValue("Id", "") == "" || referenceURI != "#"+target.SelectAttrValue("Id", "") {
+		return errors.New("XML signature must reference the consumed response root")
+	}
+	if signature.Parent() != target {
+		return errors.New("XML signature must be a direct child of the signed response")
+	}
+	return nil
 }
 
 func digestBytes(algorithm string, data []byte) ([]byte, error) {
