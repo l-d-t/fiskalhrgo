@@ -8,9 +8,12 @@ import (
 	"crypto"
 	"crypto/rsa"
 	"crypto/sha1"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/beevik/etree"
 )
@@ -40,7 +43,7 @@ func createSignedInfoElement(referenceURI, digestValue string) *etree.Element {
 	canonicalizationMethod.CreateAttr("Algorithm", "http://www.w3.org/2001/10/xml-exc-c14n#")
 
 	signatureMethod := signedInfo.CreateElement("SignatureMethod")
-	signatureMethod.CreateAttr("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1")
+	signatureMethod.CreateAttr("Algorithm", rsaSHA256Algorithm)
 
 	reference := signedInfo.CreateElement("Reference")
 	reference.CreateAttr("URI", "#"+referenceURI)
@@ -54,7 +57,7 @@ func createSignedInfoElement(referenceURI, digestValue string) *etree.Element {
 	transform2.CreateAttr("Algorithm", "http://www.w3.org/2001/10/xml-exc-c14n#")
 
 	digestMethod := reference.CreateElement("DigestMethod")
-	digestMethod.CreateAttr("Algorithm", "http://www.w3.org/2000/09/xmldsig#sha1")
+	digestMethod.CreateAttr("Algorithm", digestSHA256Algorithm)
 
 	digestValueElement := reference.CreateElement("DigestValue")
 	digestValueElement.SetText(digestValue)
@@ -112,13 +115,13 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 	}
 
 	// Canonicalize the XML document
-	xmlCanonical, err := doc14n(xmlRequest)
+	xmlCanonical, err := fe.canonicalizeForSigning(xmlRequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to canonicalize XML document: %v", err)
 	}
 
-	// DigestValue calculation using SHA-1
-	digest := sha1.New()
+	// DigestValue calculation using SHA-256
+	digest := sha256.New()
 	if _, err := digest.Write([]byte(xmlCanonical)); err != nil {
 		return nil, fmt.Errorf("failed to calculate digest: %v", err)
 	}
@@ -136,16 +139,16 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 	}
 
 	// Canonicalize the SignedInfo block
-	canonicalizedSignedInfo, err := doc14n(signedInfoString)
+	canonicalizedSignedInfo, err := fe.canonicalizeForSigning(signedInfoString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to canonicalize SignedInfo: %v", err)
 	}
 
 	// Step 3: Compute hash of canonicalized SignedInfo
-	hashedSignedInfo := sha1.Sum(canonicalizedSignedInfo)
+	hashedSignedInfo := sha256.Sum256(canonicalizedSignedInfo)
 
 	// Step 4: Generate the SignatureValue using the private key
-	signature, err := rsa.SignPKCS1v15(nil, fe.cert.privateKey, crypto.SHA1, hashedSignedInfo[:])
+	signature, err := rsa.SignPKCS1v15(nil, fe.cert.privateKey, crypto.SHA256, hashedSignedInfo[:])
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate signature: %v", err)
 	}
@@ -169,6 +172,18 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 	return output, nil
 }
 
+func (fe *FiskalEntity) canonicalizeForSigning(xmlData []byte) ([]byte, error) {
+	if fe.useLibxml2 {
+		return canonicalizeNativeDocument(xmlData, true)
+	}
+	return doc14n(xmlData)
+}
+
+// SignXML signs an XML document whose root element has an Id attribute.
+func (fe *FiskalEntity) SignXML(xmlData []byte) ([]byte, error) {
+	return fe.signXML(xmlData)
+}
+
 // verifyXML is currently a placeholder function for verifying signed XML documents.
 // It always returns true without performing any actual verification and should not be used in production environments
 // until proper XML signature verification is fully implemented.
@@ -183,5 +198,243 @@ func (fe *FiskalEntity) signXML(xmlRequest []byte) ([]byte, error) {
 // This limitation will remain unresolved until a suitable library is found or a custom implementation is built,
 // or until fixes are contributed and merged into existing libraries.
 func (fe *FiskalEntity) verifyXML(xmlData []byte) (bool, error) {
+	if !fe.useLibxml2 {
+		return true, nil
+	}
+	return fe.verifyXMLLibxml2(xmlData)
+}
+
+// VerifyXML verifies an XML signature and pins its certificate to the CIS
+// certificate embedded in this FiskalEntity. Native support must be enabled.
+func (fe *FiskalEntity) VerifyXML(xmlData []byte) (bool, error) {
+	if !fe.useLibxml2 {
+		return false, errors.New("XML signature verification requires libxml2; call SetUseLibxml2(true)")
+	}
+	return fe.verifyXMLLibxml2(xmlData)
+}
+
+const (
+	xmlDSigNamespace       = "http://www.w3.org/2000/09/xmldsig#"
+	c14n10Algorithm        = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315"
+	exclusiveC14NAlgorithm = "http://www.w3.org/2001/10/xml-exc-c14n#"
+	rsaSHA1Algorithm       = "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
+	rsaSHA256Algorithm     = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+	digestSHA1Algorithm    = "http://www.w3.org/2000/09/xmldsig#sha1"
+	digestSHA256Algorithm  = "http://www.w3.org/2001/04/xmlenc#sha256"
+)
+
+func (fe *FiskalEntity) verifyXMLLibxml2(xmlData []byte) (bool, error) {
+	doc := etree.NewDocument()
+	if err := doc.ReadFromBytes(xmlData); err != nil {
+		return false, fmt.Errorf("failed to parse signed XML: %w", err)
+	}
+	signatures := findXMLDSigElements(doc.Root(), "Signature")
+	if len(signatures) != 1 {
+		return false, fmt.Errorf("expected one XML signature, found %d", len(signatures))
+	}
+	signature := signatures[0]
+	signedInfo, err := requiredDSigChild(signature, "SignedInfo")
+	if err != nil {
+		return false, err
+	}
+	canonicalizationMethod, err := requiredDSigChild(signedInfo, "CanonicalizationMethod")
+	if err != nil {
+		return false, err
+	}
+	signedInfoExclusive, err := canonicalizationMode(canonicalizationMethod.SelectAttrValue("Algorithm", ""))
+	if err != nil {
+		return false, err
+	}
+
+	reference, err := requiredDSigChild(signedInfo, "Reference")
+	if err != nil {
+		return false, err
+	}
+	referenceURI := reference.SelectAttrValue("URI", "")
+	if !strings.HasPrefix(referenceURI, "#") || len(referenceURI) == 1 {
+		return false, errors.New("XML signature Reference URI must identify a local Id")
+	}
+	referenceExclusive, err := referenceCanonicalizationMode(reference)
+	if err != nil {
+		return false, err
+	}
+	canonicalReference, err := canonicalizeNativeReference(xmlData, referenceURI[1:], referenceExclusive)
+	if err != nil {
+		return false, fmt.Errorf("failed to canonicalize XML signature reference: %w", err)
+	}
+	digestMethod, err := requiredDSigChild(reference, "DigestMethod")
+	if err != nil {
+		return false, err
+	}
+	digestValue, err := requiredDSigChild(reference, "DigestValue")
+	if err != nil {
+		return false, err
+	}
+	calculatedDigest, err := digestBytes(digestMethod.SelectAttrValue("Algorithm", ""), canonicalReference)
+	if err != nil {
+		return false, err
+	}
+	expectedDigest, err := decodeBase64Text(digestValue.Text())
+	if err != nil {
+		return false, fmt.Errorf("invalid DigestValue: %w", err)
+	}
+	if !bytesEqual(calculatedDigest, expectedDigest) {
+		return false, errors.New("XML signature reference digest mismatch")
+	}
+
+	certificateElements := findXMLDSigElements(signature, "X509Certificate")
+	if len(certificateElements) != 1 {
+		return false, fmt.Errorf("expected one signing certificate, found %d", len(certificateElements))
+	}
+	certificateDER, err := decodeBase64Text(certificateElements[0].Text())
+	if err != nil {
+		return false, fmt.Errorf("invalid signing certificate: %w", err)
+	}
+	certificate, err := x509.ParseCertificate(certificateDER)
+	if err != nil {
+		return false, fmt.Errorf("invalid signing certificate: %w", err)
+	}
+	if fe.ciscert == nil || fe.ciscert.PublicCert == nil || !certificate.Equal(fe.ciscert.PublicCert) {
+		return false, errors.New("XML signing certificate is not the trusted CIS certificate")
+	}
+
+	canonicalSignedInfo, err := canonicalizeNativeSignedInfo(xmlData, signedInfoExclusive)
+	if err != nil {
+		return false, fmt.Errorf("failed to canonicalize SignedInfo: %w", err)
+	}
+	signatureMethod, err := requiredDSigChild(signedInfo, "SignatureMethod")
+	if err != nil {
+		return false, err
+	}
+	hash, digest, err := signatureDigest(signatureMethod.SelectAttrValue("Algorithm", ""), canonicalSignedInfo)
+	if err != nil {
+		return false, err
+	}
+	signatureValue, err := requiredDSigChild(signature, "SignatureValue")
+	if err != nil {
+		return false, err
+	}
+	signatureBytes, err := decodeBase64Text(signatureValue.Text())
+	if err != nil {
+		return false, fmt.Errorf("invalid SignatureValue: %w", err)
+	}
+	publicKey, ok := certificate.PublicKey.(*rsa.PublicKey)
+	if !ok {
+		return false, errors.New("CIS signing certificate does not contain an RSA public key")
+	}
+	if err := rsa.VerifyPKCS1v15(publicKey, hash, digest, signatureBytes); err != nil {
+		return false, fmt.Errorf("invalid XML signature: %w", err)
+	}
 	return true, nil
+}
+
+func findXMLDSigElements(root *etree.Element, tag string) []*etree.Element {
+	if root == nil {
+		return nil
+	}
+	var result []*etree.Element
+	if root.Tag == tag && root.NamespaceURI() == xmlDSigNamespace {
+		result = append(result, root)
+	}
+	for _, child := range root.ChildElements() {
+		result = append(result, findXMLDSigElements(child, tag)...)
+	}
+	return result
+}
+
+func requiredDSigChild(parent *etree.Element, tag string) (*etree.Element, error) {
+	var matches []*etree.Element
+	for _, child := range parent.ChildElements() {
+		if child.Tag == tag && child.NamespaceURI() == xmlDSigNamespace {
+			matches = append(matches, child)
+		}
+	}
+	if len(matches) != 1 {
+		return nil, fmt.Errorf("expected one %s element, found %d", tag, len(matches))
+	}
+	return matches[0], nil
+}
+
+func canonicalizationMode(algorithm string) (bool, error) {
+	switch algorithm {
+	case c14n10Algorithm:
+		return false, nil
+	case exclusiveC14NAlgorithm:
+		return true, nil
+	default:
+		return false, fmt.Errorf("unsupported canonicalization algorithm %q", algorithm)
+	}
+}
+
+func referenceCanonicalizationMode(reference *etree.Element) (bool, error) {
+	transforms, err := requiredDSigChild(reference, "Transforms")
+	if err != nil {
+		return false, err
+	}
+	seenEnveloped := false
+	seenCanonicalization := false
+	exclusive := false
+	for _, transform := range transforms.ChildElements() {
+		if transform.Tag != "Transform" || transform.NamespaceURI() != xmlDSigNamespace {
+			continue
+		}
+		switch algorithm := transform.SelectAttrValue("Algorithm", ""); algorithm {
+		case "http://www.w3.org/2000/09/xmldsig#enveloped-signature":
+			seenEnveloped = true
+		case c14n10Algorithm, exclusiveC14NAlgorithm:
+			var err error
+			exclusive, err = canonicalizationMode(algorithm)
+			if err != nil {
+				return false, err
+			}
+			seenCanonicalization = true
+		default:
+			return false, fmt.Errorf("unsupported XML signature transform %q", algorithm)
+		}
+	}
+	if !seenEnveloped || !seenCanonicalization {
+		return false, errors.New("XML signature must use enveloped-signature and canonicalization transforms")
+	}
+	return exclusive, nil
+}
+
+func digestBytes(algorithm string, data []byte) ([]byte, error) {
+	switch algorithm {
+	case digestSHA1Algorithm:
+		digest := sha1.Sum(data)
+		return digest[:], nil
+	case digestSHA256Algorithm:
+		digest := sha256.Sum256(data)
+		return digest[:], nil
+	default:
+		return nil, fmt.Errorf("unsupported digest algorithm %q", algorithm)
+	}
+}
+
+func signatureDigest(algorithm string, data []byte) (crypto.Hash, []byte, error) {
+	switch algorithm {
+	case rsaSHA1Algorithm:
+		digest := sha1.Sum(data)
+		return crypto.SHA1, digest[:], nil
+	case rsaSHA256Algorithm:
+		digest := sha256.Sum256(data)
+		return crypto.SHA256, digest[:], nil
+	default:
+		return 0, nil, fmt.Errorf("unsupported signature algorithm %q", algorithm)
+	}
+}
+
+func decodeBase64Text(value string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(strings.Join(strings.Fields(value), ""))
+}
+
+func bytesEqual(left, right []byte) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	var difference byte
+	for index := range left {
+		difference |= left[index] ^ right[index]
+	}
+	return difference == 0
 }

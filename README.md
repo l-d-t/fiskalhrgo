@@ -49,6 +49,35 @@ In your project root get the module
 go get github.com/l-d-t/fiskalhrgo
 ```
 
+### Native XML signatures on Linux
+
+The optional Linux backend uses the system `libxml2` implementation for XML canonicalization and strict CIS response signature verification. Install the development package and `pkg-config` for your distribution:
+
+```bash
+# Debian/Ubuntu
+sudo apt install build-essential pkg-config libxml2-dev
+
+# Fedora/RHEL
+sudo dnf install gcc pkgconf-pkg-config libxml2-devel
+
+# Alpine
+apk add build-base pkgconf libxml2-dev
+```
+
+Build with cgo and the `libxml2` tag, then enable the backend on the entity:
+
+```bash
+CGO_ENABLED=1 go build -tags libxml2 ./...
+```
+
+```go
+if err := fiskalEntity.SetUseLibxml2(true); err != nil {
+    log.Fatal(err)
+}
+```
+
+New XML requests use RSA-SHA256 and SHA-256 digest algorithms in both the portable and native builds. SHA-1 remains in use only for the legally specified ZKI calculation and is not used to sign XML requests.
+
 ## Usage
 
 Minimal simple example of CIS ping using the EchoRequest and get some cert info.

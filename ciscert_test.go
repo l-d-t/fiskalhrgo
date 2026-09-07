@@ -7,10 +7,10 @@ package fiskalhrgo
 import "testing"
 
 // Expected serial number of the embedded CIS demo certificate currently in use
-const expectedDemoSerial = "325450325973957308031939306065516468253"
+const expectedDemoSerial = "125647116929350878241146578378192994801"
 
 // Expected serial number of the embedded CIS production certificate currently in use
-const expectedProdSerial = "313300731601639444557048129613010882577"
+const expectedProdSerial = "86885036496942243675781140548806350693"
 
 // Test embedded CIS demo certificate
 func TestParseAndVerifyEmbeddedCertsDemo(t *testing.T) {

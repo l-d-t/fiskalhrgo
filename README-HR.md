@@ -50,6 +50,35 @@ U korijenu vašeg projekta preuzmite modul
 go get github.com/l-d-t/fiskalhrgo
 ```
 
+### Native XML potpisi na Linuxu
+
+Opcionalni Linux backend koristi sistemski `libxml2` za XML kanonikalizaciju i strogu provjeru potpisa CIS odgovora. Instalirajte razvojni paket i `pkg-config` za svoju distribuciju:
+
+```bash
+# Debian/Ubuntu
+sudo apt install build-essential pkg-config libxml2-dev
+
+# Fedora/RHEL
+sudo dnf install gcc pkgconf-pkg-config libxml2-devel
+
+# Alpine
+apk add build-base pkgconf libxml2-dev
+```
+
+Kompilirajte s cgo podrškom i `libxml2` oznakom, a zatim uključite backend na entitetu:
+
+```bash
+CGO_ENABLED=1 go build -tags libxml2 ./...
+```
+
+```go
+if err := fiskalEntity.SetUseLibxml2(true); err != nil {
+    log.Fatal(err)
+}
+```
+
+Novi XML zahtjevi koriste RSA-SHA256 i SHA-256 digest u portable i native buildu. SHA-1 ostaje samo u zakonski propisanom izračunu ZKI-ja i ne koristi se za potpisivanje XML zahtjeva.
+
 ## Korištenje
 
 Minimalni jednostavni primjer CIS pinga koristeći EchoRequest i dohvaćanje nekih informacija o certifikatu.

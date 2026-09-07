@@ -57,6 +57,9 @@ type FiskalEntity struct {
 	// url is the endpoint URL for the CIS service.
 	// This URL is used to send fiscalization requests to the CIS system.
 	url string
+
+	// useLibxml2 enables the optional Linux libxml2 XML signature backend.
+	useLibxml2 bool
 }
 
 // NewFiskalEntity creates a new FiskalEntity with provided values, validates certificates and input before returning an entity.
@@ -179,6 +182,26 @@ func (fe *FiskalEntity) CentralizedInvoiceNumber() bool {
 // DemoMode indicates whether the entity is in demo mode (Demo Fiskalizacija).
 func (fe *FiskalEntity) DemoMode() bool {
 	return fe.demoMode
+}
+
+// SetUseLibxml2 enables or disables the native libxml2 XML signature backend.
+// The backend is available on Linux builds compiled with -tags libxml2.
+func (fe *FiskalEntity) SetUseLibxml2(enable bool) error {
+	if enable && !libxml2Available {
+		return errors.New("libxml2 support is unavailable; build on Linux with CGO_ENABLED=1 and -tags libxml2")
+	}
+	fe.useLibxml2 = enable
+	return nil
+}
+
+// UseLibxml2 reports whether the native XML signature backend is enabled.
+func (fe *FiskalEntity) UseLibxml2() bool {
+	return fe.useLibxml2
+}
+
+// Libxml2Available reports whether this build includes Linux libxml2 support.
+func Libxml2Available() bool {
+	return libxml2Available
 }
 
 func (fe *FiskalEntity) DisplayCertInfoText() string {

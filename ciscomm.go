@@ -106,9 +106,12 @@ func (fe *FiskalEntity) GetResponse(xmlPayload []byte, sign bool) ([]byte, int, 
 
 	if sign {
 		// Verify the signature
-		_, err := fe.verifyXML(body)
+		verified, err := fe.verifyXML(body)
 		if err != nil {
 			return body, resp.StatusCode, fmt.Errorf("failed to verify CIS signature: %w", err)
+		}
+		if !verified {
+			return body, resp.StatusCode, errors.New("CIS XML signature is invalid")
 		}
 	}
 
