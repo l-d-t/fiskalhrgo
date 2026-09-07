@@ -3,10 +3,13 @@ name: Test
 on:
   push:
     branches: [ "main" ]
-  pull_request_target:
+  pull_request:
     branches: [ "main" ]
   schedule:
     - cron: "0 0 1 * *"  # Runs at 00:00 on the 1st day of every month
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -27,19 +30,11 @@ jobs:
       FISKALHRGO_TEST_KNOWN_ZKI: ${{ secrets.FISKALHRGO_TEST_KNOWN_ZKI }}
       CISTESTPRODPING: ${{ secrets.CISTESTPRODPING }}
     steps:
-      - name: Checkout PR branch
-        if: ${{ github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v4
-        with:
-          # Check out the PR's head commit to test the contributor's changes
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Checkout default (non-PR)
-        if: ${{ github.event_name != 'pull_request_target' }}
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -47,16 +42,17 @@ jobs:
         run: go build -v ./...
 
       - name: Test
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: go test -v ./...
 
       # Keep portable coverage on every OS. Run the real CIS DEMO integration
       # suite with native verification as well on one Linux matrix entry.
       - name: Install native XML test dependencies
-        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
+        if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
         run: sudo apt-get update && sudo apt-get install -y pkg-config libxml2-dev xmlsec1
 
       - name: Test native XML signatures and CIS DEMO
-        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
+        if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
         env:
           CGO_ENABLED: '1'
         run: go test -tags libxml2 -race -count=1 -v ./...
