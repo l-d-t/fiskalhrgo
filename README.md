@@ -44,6 +44,17 @@ While there are numerous open-source implementations of Croatian fiscalization l
 
 Target version: **Go 1.27.1** (current stable release).
 
+## Versioning
+
+The release version is `v1.<CIS-version-without-dot>.<revision>`:
+
+- The first number is fixed at `1`. The middle number is the CIS specification revision with its dot removed: CIS `2.7` is `27`; CIS `2.8` is `28`.
+- Current release: `v1.27.1`, supporting CIS specification `2.7`, published on `2026-07-21`.
+- A new CIS specification revision starts with revision `0`. For example, CIS `2.8` starts at `v1.28.0`.
+- Within the same CIS specification, increment the final revision number for security fixes and other corrections.
+
+The same data is available to programs through `ReleaseVersion`, `CISSpecificationVersion`, and `CISSpecificationDate`. This version identifies CIS protocol support only; it does not imply full Fiskalizacija 2.0 or eRačun support.
+
 ## Installation
 
 In your project root, install the module:

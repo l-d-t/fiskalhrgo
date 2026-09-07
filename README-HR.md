@@ -44,6 +44,17 @@ Postoje brojne biblioteke otvorenog koda za fiskalizaciju, ali većina je namije
 
 Ciljana verzija: **Go 1.27.1** (trenutačna stabilna verzija).
 
+## Verzije
+
+Verzija izdanja ima oblik `v1.<CIS-verzija-bez-točke>.<revizija>`:
+
+- Prvi broj je uvijek `1`. Srednji broj je CIS revizija specifikacije bez točke: CIS `2.7` je `27`, a CIS `2.8` je `28`.
+- Trenutačno izdanje: `v1.27.1`, s podrškom za CIS specifikaciju `2.7`, objavljenu `2026-07-21`.
+- Nova CIS revizija počinje s revizijom `0`. Primjerice, CIS `2.8` počinje s `v1.28.0`.
+- Unutar iste CIS specifikacije povećajte zadnji revizijski broj za sigurnosne i ostale ispravke.
+
+Isti su podaci dostupni programima kroz `ReleaseVersion`, `CISSpecificationVersion` i `CISSpecificationDate`. Ova verzija označava samo podršku CIS protokolu; ne znači potpunu podršku za Fiskalizaciju 2.0 ili eRačun.
+
 ## Instalacija
 
 U korijenu svojeg projekta instalirajte modul:
